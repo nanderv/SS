@@ -20,7 +20,7 @@ addons:
       - libgmp-dev
       - cmake
     sources: 
-      - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
 
 before_install: 
   - export SYLVAN_VERSION="1.2.0"
