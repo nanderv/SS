@@ -7,7 +7,11 @@ on your machine. Then it will explain how to compile the project.
 When successful, you should be able to load a Petri net and
 print the size of the Petri net specification.
 Do not hesitate to send me an e-mail at j.j.g.meijer [at] utwente [dot] nl,
-if you at any step below run into an issue.
+if you at any step below run into an issue. Furthermore, there is also a
+[Travis CI build script](https://github.com/Meijuh/MACS2/blob/master/.travis.yml).
+which may help guide you in your journey described in the next sections 
+(Build statusses, with expected output can be found e.g. 
+[here](https://travis-ci.org/Meijuh/MACS2/builds/227652263)).
 
 ## Configuring
 To configure this autotools project on your machine, make sure
@@ -15,6 +19,7 @@ to meet the following requirements:
  *  Ubuntu 64-bit >= 14.04, (or any other Linux distro with similar
     packages). If you do not have Linux installed, easiest is to download 
     a Virtual box virtual machine from http://www.osboxes.org/ubuntu/.
+    Furthermore, any recent enough OSX version also works for MACS2.
  *  This project depends on the following packages:
     * GNU automake: 
     * GNU autoconf:
@@ -56,8 +61,8 @@ project.
  * Install Sylvan: `make install`
 
 ### MACS2 lab files
- * Clone this git repository
- * Enter the git repository
+ * Clone this git repository: `git clone https://github.com/Meijuh/MACS2.git`
+ * Enter the git repository: `cd MACS2`
  * Generate config files: `./macs2reconf`
  * Configure lab class: `./configure`
  * Compile the lab files: `make`
@@ -86,7 +91,7 @@ now.
 
 ## Exercise 2
 The first programming exercise is to compute the marking graph symbolically,
-this means computing the state space. The main idea is to use Sylvan's
+this means computing the state space with BDDs. The main idea is to use Sylvan's
 [sylvan_satcount](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/src/sylvan_bdd.h#L161)
 function, to compute the number of markings, and
 [sylvan_relnext](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/src/sylvan_bdd.h#L111)
@@ -142,7 +147,8 @@ you are interested in the first value (243).
 
 The exercise is now as follows.
  1. Think about what data structures you require while parsing the
-    ANDL files, e.g. what do you need to map names of places to BDD variables?
+    ANDL files, e.g. what do you need to map names of places to BDD variables,
+    or how are you going to store the initial marking?
  1. Write/download whatever code for these datastructures is necessary, and
     declare those data structures in
     [`andl_context_t`](https://github.com/Meijuh/MACS2/blob/master/src/andl.h),
@@ -150,8 +156,8 @@ The exercise is now as follows.
     The `andl_context_t` is a structure that is available while parsing ANDL files.
  1. Modify the [parser](https://github.com/Meijuh/MACS2/blob/master/src/andl-parser.y)
     to fill the data structures accordingly.
- 1. Implement a Breadth-first symbolic state space generator, starting
+ 1. Implement a *Breadth-first* symbolic state space generator, starting
     [here](https://github.com/Meijuh/MACS2/blob/master/src/macs2.c#L79).
- 1. Make sure the return value `sylvan_satcount` corresponds with the known
+ 1. Make sure the return value of `sylvan_satcount` corresponds with the known
     answers in `raw-result-analysis.csv`, for as many Petri nets as possible
     (which you downloaded from Blackboard).
