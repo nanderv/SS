@@ -18,7 +18,10 @@ addons:
       - libnuma-dev
       - libhwloc-dev
       - libgmp-dev
- 
+      - cmake
+    sources: 
+      - ubuntu-toolchain-r-test
+
 before_install: 
   - export SYLVAN_VERSION="1.2.0"
   - export SYLVAN_URL="https://github.com/trolando/sylvan/archive/v$SYLVAN_VERSION.tar.gz"
@@ -45,6 +48,7 @@ install:
 
 before_script:
   - export PKG_CONFIG_PATH="$HOME/deps/lib/pkgconfig"
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/bison/bin:$PATH"; fi 
 
 script:
   - ./macs2reconf
