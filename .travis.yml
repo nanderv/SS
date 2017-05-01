@@ -8,6 +8,9 @@ os:
 - linux
 - osx
 
+dist: trusty
+sudo: false
+
 cache:
   directories:
     - $HOME/deps
@@ -18,9 +21,6 @@ addons:
       - libnuma-dev
       - libhwloc-dev
       - libgmp-dev
-      - cmake
-    sources: 
-      - george-edison55-precise-backports
 
 before_install: 
   - export SYLVAN_VERSION="1.2.0"
