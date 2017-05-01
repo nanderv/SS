@@ -72,5 +72,86 @@ project.
         2017-05-01 16:38:45: There are 35 out arcs
 
 ## Exercise 1
+Read Sylvan's documentation at: https://trolando.github.io/sylvan/.
 
+## Exercise 2
+Familiarize yourself with
+[Petri nets](https://en.wikipedia.org/wiki/Petri_net).
+In this course, many example Petri nets are provided as
+[PNML](http://www.pnml.org/), and 
+[ANDL](http://www-dssz.informatik.tu-cottbus.de/track/download.php?id=187).
+The latter URL contains a document containing an EBNF grammar for
+Petri net specifications, it is only for reference, you do not need to read it 
+now. 
 
+## Exercise 2
+The first programming exercise is to compute the marking graph symbolically,
+this means computing the state space. The main idea is to use Sylvan's
+[sylvan_satcount](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/src/sylvan_bdd.h#L161)
+function, to compute the number of markings, and
+[sylvan_relnext](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/src/sylvan_bdd.h#L111)
+to compute the next marking of a particular transition.
+It is advised to "consult"
+[this file](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/examples/mc.c),
+which contains code for computing a state space.
+
+The lab files in this repository already provide three important aspects:
+ * A lexer for ANDL: https://github.com/Meijuh/MACS2/blob/master/src/andl-lexer.l
+ * A parser for ANDL: https://github.com/Meijuh/MACS2/blob/master/src/andl-parser.y
+ * Some borderplate code for printing the size of the Petri net specification:
+   https://github.com/Meijuh/MACS2/blob/master/src/macs2.c.
+
+For MACS2 we think it is much easer to extend the ANDL parser, than it is to
+create a PNML parser. Feel free to create a PNML parser though.
+
+On Blackboard, under `Course Materials | Lab files | Petri nets` many
+example Petri nets have been made available in an archive. Every directory
+in the archive contains a Petri net specification. Important files for
+this exercise in each directory are:
+ * `1-safe`: if this file exists the Petri net is 1-safe.
+ * `model.pnml`: the Petri net specified in PNML, which is not irrelevant if
+   you use the ANDL parser.
+ * `model.andl`: the Petri net specified in ANDL.
+
+Whenever you have finished writing your symbolic state space generator you
+can consult
+[raw-results-analysis.csv](https://github.com/Meijuh/MACS2/blob/master/MCC/raw-result-analysis.csv).
+This CSV file, contains all known answers from last year's
+[Petri net Model Checking Contest](http://mcc.lip6.fr/), more specifically the 
+column:
+ * Input: the name of the Petri net. **Note** the Petri nets with `-COL-`,
+   are irrelevant for this MACS2 course.
+ * estimated result: contains the known answer for Petri nets.
+ * Examination: the category to which the answer belongs.
+
+Relevant for this exercise is the `StateSpace`, and `Examination` column.
+For example, if we want to know the size of the marking graph of a Petri net
+specification with 5 dining philosophers, we look at:
+ * Input = Philosophers-PT-000005,
+ * Examination = StateSpace,
+
+This shows *243 945 1 10* in the column *estimated result*, meaning that
+ 1. the marking graph has 243 vertices,
+ 1. the marking graph has 945 edges,
+ 1. the maximum number of tokens that any place can have is 1 (hence
+    it is 1-safe),
+ 1. the maximum sum of tokens never exceeds 10 tokens.
+
+So, if you want to verify if the answer given by `sylvan_satcount` is correct,
+you are interested in the first value (243).
+
+The exercise is now as follows.
+ 1. Think about what data structures you require while parsing the
+    ANDL files, e.g. what do you need to map names of places to BDD variables?
+ 1. Write/download whatever code for these datastructures is necessary, and
+    declare those data structures in
+    [`andl_context_t`](https://github.com/Meijuh/MACS2/blob/master/src/andl.h),
+    feel free to change any existing code there.
+    The `andl_context_t` is a structure that is available while parsing ANDL files.
+ 1. Modify the [parser](https://github.com/Meijuh/MACS2/blob/master/src/andl-parser.y)
+    to fill the data structures accordingly.
+ 1. Implement a Breadth-first symbolic state space generator, starting
+    [here](https://github.com/Meijuh/MACS2/blob/master/src/macs2.c#L79).
+ 1. Make sure the return value `sylvan_satcount` corresponds with the known
+    answers in `raw-result-analysis.csv`, for as many Petri nets as possible
+    (which you downloaded from Blackboard).
