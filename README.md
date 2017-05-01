@@ -89,7 +89,7 @@ The latter URL contains a document containing an EBNF grammar for
 Petri net specifications, it is only for reference, you do not need to read it 
 now. 
 
-## Exercise 2
+## Exercise 3
 The first programming exercise is to compute the marking graph symbolically,
 this means computing the state space with BDDs. The main idea is to use Sylvan's
 [sylvan_satcount](https://github.com/utwente-fmt/sylvan/blob/v1.2.0/src/sylvan_bdd.h#L161)
