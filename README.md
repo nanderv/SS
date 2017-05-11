@@ -161,3 +161,35 @@ The exercise is now as follows.
  1. Make sure the return value of `sylvan_satcount` corresponds with the known
     answers in `raw-result-analysis.csv`, for as many Petri nets as possible
     (which you downloaded from Blackboard).
+
+## Common Pitfalls and hints
+ 1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
+    unprotect (with `sylvan_unprotect`) those before closing the
+    variable scope. The pointers will become invalid after the scope is closed!
+ 1. The default LACE deque size may be to small, even for smaller Petri nets.
+    If you get unexpected segfaults, try increasing the deque size, e.g.
+    `lace_init(n_workers, 40960000)`. I suggest changing this value anyway.
+ 1. The easiest way to declare a set of BDD variables is using functions like
+    `sylvan_set_empty()`, and `sylvan_set_add()`. Do not forget to protect
+    the set.
+ 1. The easiest way to declare a map for variable renaming use functions like
+    `sylvan_map_empty()`, and `sylvan_map_add()`. Do not forget to protect
+    the map. Variable renaming is not necessary when you use `sylvan_relnext`.
+ 1. Whenever you constructed a BDD, you can visualize it with Graphviz, e.g.:
+
+        {
+             BDD bdd; // some BDD
+             int i = 0;
+             char b[256];
+             snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
+             FILE *f = fopen(b, "w+");
+             sylvan_fprintdot(f, bdd);
+             fclose(f);
+        }
+    This allows you to make sure you constructed the correct BDD.
+ 1. Whenever you need a hashmap while parsing an ANDL file; I have found that
+    [this one](https://github.com/petewarden/c_hashmap) is quite suitable.
+    To include it in a binary, e.g. the `macs2` binary, add the following line
+    to `src/Makefile.am`: `macs2_SOURCES   +=      hashmap.h hashmap.c`, and
+    add `hashmap.h`, and `hashmap.c` to the `src` directory.
+
