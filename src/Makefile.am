@@ -3,8 +3,9 @@ bin_PROGRAMS = macs2
 macs2_SOURCES	=	macs2.c 
 macs2_SOURCES	+= 	andl-lexer.l andl-parser.y 
 macs2_SOURCES	+=	util.h util.c
-macs2_CFLAGS = $(SYLVAN_CFLAGS)
-macs2_LDADD = $(SYLVAN_LIBS)
+
+macs2_CFLAGS = $(SYLVAN_CFLAGS) $(XML_CFLAGS)
+macs2_LDADD = $(SYLVAN_LIBS) $(XML_LIBS)
 
 macs2_YFLAGS   = -d
 

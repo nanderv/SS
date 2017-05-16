@@ -24,6 +24,10 @@ AX_PROG_BISON_VERSION([3.0.2],,[AC_MSG_FAILURE([Please install Bison >= 3.0.2])]
 #AC_CHECK_LIB([popt],[poptGetContext],,[AC_MSG_FAILURE([popt not found.])])
 #AC_CHECK_HEADER([popt.h],[], [AC_MSG_FAILURE([popt.h not found.])])
 
+PKG_CHECK_MODULES([XML], [libxml-2.0],,[
+    AC_MSG_FAILURE(libxml2 is not installed. Please install libxml2.)
+]) 
+
 AC_MSG_NOTICE([All is okay :)])
 
 AC_OUTPUT
