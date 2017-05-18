@@ -162,6 +162,16 @@ The exercise is now as follows.
     answers in `raw-result-analysis.csv`, for as many Petri nets as possible
     (which you downloaded from Blackboard).
 
+## Exercise 4
+In this exercise we are going to build a CTL model checker, where atomic
+predicates are expressions for the fireability of Petri net transitions.
+The Petri net model checking contest specifies these kind of formulas in files
+named CTLFireability.[xml|txt]. The exact syntax and semantics is specified
+in `MCC2016-FormulaManual.pdf`, located in the root directory of this git
+repository. The syntax and semantics are very much the same as in the lectures.
+However, whenever, there is a predicate `is-fireable(t1,t2,)`, this actually
+means a disjunction; `t1`, or `t2` should be fireable.
+
 ## Common Pitfalls and hints
  1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
     unprotect (with `sylvan_unprotect`) those before closing the
