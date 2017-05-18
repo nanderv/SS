@@ -180,10 +180,12 @@ over the XML nodes, that simply prints the formula. The `parse_xml` function
 implements a bit of bootstrapping for printing the actual formulas, indeed
 there are multiple formulas in each CTLFireability.xml file.
 
+For this exercise an XML parser is necessary: `libxml2`, to install this parser
+run `apt-get install libxml2-dev`. To configure your macs2 project to use
+this new parser run `./macs2reconf`, and `./configure`, before running `make`.
+
 You can now parse an XML file e.g. as follows:
 `src/macs2 examples/model.andl examples/CTLFireability.xml`.
-Do not forget to run `./macs2reconf`, and `./configure`, before recompiling
-with `make` to reproduce this example.
 
 To get started with the CTL model checker it is probably easiest to change the in-order traversal to
 a post-order traversal and to create a simple parse tree.
