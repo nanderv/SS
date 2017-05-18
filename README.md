@@ -167,10 +167,51 @@ In this exercise we are going to build a CTL model checker, where atomic
 predicates are expressions for the fireability of Petri net transitions.
 The Petri net model checking contest specifies these kind of formulas in files
 named CTLFireability.[xml|txt]. The exact syntax and semantics is specified
-in `MCC2016-FormulaManual.pdf`, located in the root directory of this git
-repository. The syntax and semantics are very much the same as in the lectures.
-However, whenever, there is a predicate `is-fireable(t1,t2,)`, this actually
-means a disjunction; `t1`, or `t2` should be fireable.
+in [MCC2016-FormulaManual.pdf](https://github.com/Meijuh/MACS2/blob/master/MCC2016-FormulaManual.pdf),
+located in the root directory of this git repository. The syntax and semantics 
+are very much the same as in the lectures. However, whenever there is a
+predicate `is-fireable(t1,t2,)`, this actually means a disjunction; 
+`t1`, or `t2` should be fireable.
+
+Example code for parsing temporal logic formulas can be found here:
+https://github.com/Meijuh/MACS2/blob/master/src/macs2.c#L90-L212. The current
+implementation (specifically function `parse_formula`) is an in-order traversal
+over the XML nodes, that simply prints the formula. The `parse_xml` function
+implements a bit of bootstrapping for printing the actual formulas, indeed
+there are multiple formulas in each CTLFireability.xml file.
+
+You can now parse an XML file e.g. as follows:
+`src/macs2 examples/model.andl examples/CTLFireability.xml`.
+Do not forget to run `./macs2reconf`, and `./configure`, before recompiling
+with `make` to reproduce this example.
+
+To get started with the CTL model checker it is probably easiest to change the in-order traversal to
+a post-order traversal and to create a simple parse tree.
+
+Use this simple parse tree to implement a CTL model checker such as described
+in the lecture slides.
+
+Notes:
+
+1. whenever you change the XML parser, never access fields `next`, `content`,
+`children` of type `xmlNode*` directly. Use their respective accessors `xmlNextElementSibling`,
+`xmlNodeGetContent`, and `xmlFirstElementChild`.
+1. You are at this moment only required to support formulas in the CTLFireability
+category. Other formulas such as CTLCardinality have different atomic predicates, you
+do not need to support.
+
+## Exercise 5
+In this exercise you can choose what kind of feature you want to extend your
+model checker with. You can of course implement more of the following.
+
+1. Support for Cardinality predicates (as specified in `MCC2016-FormulaManual.pdf`),
+1. LTL model checking,
+1. Static variable ordering,
+1. Dynamic variable ordering,
+1. Deadlock detection,
+1. Advanced reachability algorithms, such as chaining, saturation, or any
+   algorithm where transition relations are applied in a particular order.
+1. Any other category (as specified in `MCC2016-FormulaManual.pdf`).
 
 ## Common Pitfalls and hints
  1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
