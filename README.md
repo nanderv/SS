@@ -207,7 +207,7 @@ In this exercise you can choose what kind of feature you want to extend your
 model checker with. You can of course implement more of the following.
 
 1. Support for Cardinality predicates (as specified in `MCC2016-FormulaManual.pdf`),
-1. LTL model checking,
+1. LTL model checking with support for (LTLFireability.xml),
 1. Static variable ordering,
 1. Dynamic variable ordering,
 1. Deadlock detection,
