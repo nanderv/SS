@@ -184,11 +184,12 @@ For this exercise an XML parser is necessary: `libxml2`, to install this parser
 run `apt-get install libxml2-dev`. To configure your macs2 project to use
 this new parser run `./macs2reconf`, and `./configure`, before running `make`.
 
-You can now parse an XML file e.g. as follows:
+If you have checked out the most recent version of this GIT repository, you can
+now parse an XML file e.g. as follows:
 `src/macs2 examples/model.andl examples/CTLFireability.xml`.
 
-To get started with the CTL model checker it is probably easiest to change the in-order traversal to
-a post-order traversal and to create a simple parse tree.
+To get started with the CTL model checker it is probably easiest to change the
+in-order traversal to a post-order traversal and to create a simple parse tree.
 
 Use this simple parse tree to implement a CTL model checker such as described
 in the lecture slides.
@@ -196,23 +197,34 @@ in the lecture slides.
 Notes:
 
 1. whenever you change the XML parser, never access fields `next`, `content`,
-`children` of type `xmlNode*` directly. Use their respective accessors `xmlNextElementSibling`,
-`xmlNodeGetContent`, and `xmlFirstElementChild`.
+`children` of type `xmlNode*` directly. Use their respective accessors
+`xmlNextElementSibling`, `xmlNodeGetContent`, and `xmlFirstElementChild`.
 1. You are at this moment only required to support formulas in the CTLFireability
 category. Other formulas such as CTLCardinality have different atomic predicates, you
 do not need to support.
+1. As mentioned; the CTL formulas are also available in a textual (.txt)
+   format, feel free to generate a parser based on an BNF grammar, if that
+   is easier.
 
 ## Exercise 5
 In this exercise you can choose what kind of feature you want to extend your
 model checker with. You can of course implement more of the following.
 
-1. Support for Cardinality predicates (as specified in `MCC2016-FormulaManual.pdf`),
-1. LTL model checking with support for (LTLFireability.xml),
-1. Static variable ordering,
-1. Dynamic variable ordering,
-1. Deadlock detection,
+1. Support for Cardinality predicates (as specified in `MCC2016-FormulaManual.pdf`).
+1. LTL model checking with support for LTLFireability.xml.
+1. Static variable ordering.
+1. Dynamic variable ordering.
+1. Deadlock detection.
 1. Advanced reachability algorithms, such as chaining, saturation, or any
    algorithm where transition relations are applied in a particular order.
+1. Unsafe Petri nets.
+1. Colored Petri nets.
+1. CEGAR.
+1. SAT solving.
+1. CTL model checking with forward traversals (see "CTL model checking based on
+   forward state traversal" on Blackboard).
+1. Partial Order Reduction with BDDs.
+1. Multi-valued Decision Diagrams (e.g. with sylvan-ldd.h)
 1. Any other category (as specified in `MCC2016-FormulaManual.pdf`).
 
 ## Common Pitfalls and hints
