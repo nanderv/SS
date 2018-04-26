@@ -36,13 +36,13 @@
     }
 
     void yyerror(YYLTYPE *loc, void *scanner, andl_context_t *andl_context, const char* c) {
-        warn("Parse error on line %d: %s", loc->first_line, c);   
+        warn("Parse error on line %d: %s", loc->first_line, c);
         andl_context->error = 1;
         (void) scanner;
     }
 }
 
-%union { 
+%union {
     char *text;
     int number;
     arc_dir_t dir;
@@ -71,6 +71,7 @@
 
 %%
 
+/* top rule, parse the Petri net declaration. */
 pn
     :   PN LBRAC IDENT RBRAC LCURLY items RCURLY {
             andl_context->name = strdup($3);
@@ -107,7 +108,7 @@ discrete
     ;
 
 transitions
-    :   TRANSITIONS COLON tdecs 
+    :   TRANSITIONS COLON tdecs
     ;
 
 pdecs
@@ -115,6 +116,7 @@ pdecs
     |   /* empty */
     ;
 
+/* single place declaration */
 pdec
     :   IDENT ASSIGN NUMBER SEMICOLON {
             andl_context->num_places++;
@@ -122,7 +124,7 @@ pdec
         }
     |   IDENT error SEMICOLON {
             warn("Something went wrong with place %s on line %d", $1, @1.first_line);
-            andl_context->error = 1;    
+            andl_context->error = 1;
         }
     ;
 
@@ -131,12 +133,15 @@ tdecs
     |   /* empty */
     ;
 
+/* single transition declaration */
 tdec
     :   IDENT COLON conditions COLON {
             andl_context->num_transitions++;
+            /* free the string of the previous transition */
             if (andl_context->current_trans != NULL) {
                 free(andl_context->current_trans);
             }
+            /* copy the name of the current transition */
             andl_context->current_trans = strdup($1);
             if (andl_context->current_trans == NULL) {
                 warn("out of memory");
@@ -157,21 +162,22 @@ conditions
 arcs
     :   arc
     |   arcs AMP arc
-    |   /* empty */ 
+    |   /* empty */
     ;
 
+/* parse a single arc */
 arc
     :   LBRAC IDENT op const_function RBRAC {
             if ($4 != 1) {
                 warn(
-                    "Not a 1-safe net." 
+                    "Not a 1-safe net."
                     " Petri net should always produce, or consume 1 token,"
                     " Instead, was: %d.",
                     $4);
                 andl_context->error = 1;
             }
             /* Here you can do something with
-             * andl_context->curren_trans */
+             * andl_context->current_trans */
             if ($3 == ARC_IN) {
                 andl_context->num_in_arcs++;
             } else { // $3 == ARC_OUT

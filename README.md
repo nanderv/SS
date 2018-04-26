@@ -1,17 +1,17 @@
-# Modeling and Analysis of Concurrent Systems 2 Lab
+# Software Science Project 1, assignment 2
 
 ## Introduction
-This repository contains all files necessary for the MACS2 lab classes.
+This repository contains all files necessary for the Software Science project 1, assignment 2.
 This README will first explain how to configure this autotools project
 on your machine. Then it will explain how to compile the project.
-When successful, you should be able to load a Petri net and
-print the size of the Petri net specification.
+When successful, you should be able to load a Petri net,
+print the size of the Petri net specification, and parse a CTL formula specified in XML.
 Do not hesitate to send me an e-mail at j.j.g.meijer [at] utwente [dot] nl,
 if you at any step below run into an issue. Furthermore, there is also a
-[Travis CI build script](https://github.com/Meijuh/MACS2/blob/master/.travis.yml).
+[Travis CI build script](https://github.com/Meijuh/SS/blob/master/.travis.yml).
 which may help guide you in your journey described in the next sections 
 (Build statusses, with expected output can be found e.g. 
-[here](https://travis-ci.org/Meijuh/MACS2/builds/227652263)).
+[here](https://travis-ci.org/Meijuh/SS/builds/227652263)).
 
 ## Configuring
 To configure this autotools project on your machine, make sure
@@ -19,8 +19,9 @@ to meet the following requirements:
  *  Ubuntu 64-bit >= 14.04, (or any other Linux distro with similar
     packages). If you do not have Linux installed, easiest is to download 
     a Virtual box virtual machine from http://www.osboxes.org/ubuntu/.
-    Furthermore, any recent enough OSX version also works for MACS2.
+    Furthermore, any recent enough OSX version also works for this assignment.
  *  This project depends on the following packages:
+    * A C compiler, preferably GCC, or Clang:
     * GNU automake: 
     * GNU autoconf:
     * GNU libtool:
@@ -32,10 +33,11 @@ to meet the following requirements:
     * cmake (>= 3.0)
     * gmplib
     * hwloc
+    * libxml2
 
 The easiest way to install these packages (on Ubuntu) is by running:
  * `apt-get install build-essential bison flex automake autoconf pkgconf
-   libnuma-dev libhwloc-dev libgmp-dev`.
+   libnuma-dev libhwloc-dev libgmp-dev libxml2-dev`.
 
 If you are using Ubuntu 14.04 you need to add an extra repository to
 get a recent enough version of `cmake` do:
@@ -60,13 +62,13 @@ project.
  * Compile Sylvan: `make`
  * Install Sylvan: `make install`
 
-### MACS2 lab files
- * Clone this git repository: `git clone https://github.com/Meijuh/MACS2.git`
- * Enter the git repository: `cd MACS2`
- * Generate config files: `./macs2reconf`
+### SS lab files
+ * Clone this git repository: `git clone https://github.com/Meijuh/SS.git`
+ * Enter the git repository: `cd SS`
+ * Generate config files: `./ss2reconf`
  * Configure lab class: `./configure`
  * Compile the lab files: `make`
- * Parse a simple Petri net in ANDL format: `src/macs2 examples/model.andl`,
+ * Parse a simple Petri net in ANDL format: `src/ss examples/model.andl`,
     if successful you should see something similar to:        
 
         2017-05-01 16:38:45: Successful parse of file 'examples/model.andl' :)         
@@ -101,12 +103,12 @@ It is advised to "consult"
 which contains code for computing a state space.
 
 The lab files in this repository already provide three important aspects:
- * A lexer for ANDL: https://github.com/Meijuh/MACS2/blob/master/src/andl-lexer.l
- * A parser for ANDL: https://github.com/Meijuh/MACS2/blob/master/src/andl-parser.y
+ * A lexer for ANDL: https://github.com/Meijuh/SS/blob/master/src/andl-lexer.l
+ * A parser for ANDL: https://github.com/Meijuh/SS/blob/master/src/andl-parser.y
  * Some borderplate code for printing the size of the Petri net specification:
-   https://github.com/Meijuh/MACS2/blob/master/src/macs2.c.
+   https://github.com/Meijuh/SS/blob/master/src/ss.c.
 
-For MACS2 we think it is much easer to extend the ANDL parser, than it is to
+For SS we think it is much easer to extend the ANDL parser, than it is to
 create a PNML parser. Feel free to create a PNML parser though.
 
 On Blackboard, under `Course Materials | Lab files | Petri nets` many
@@ -120,12 +122,12 @@ this exercise in each directory are:
 
 Whenever you have finished writing your symbolic state space generator you
 can consult
-[raw-results-analysis.csv](https://github.com/Meijuh/MACS2/blob/master/MCC/raw-result-analysis.csv).
+[raw-results-analysis.csv](https://github.com/Meijuh/SS/blob/master/MCC/raw-result-analysis.csv).
 This CSV file, contains all known answers from last year's
 [Petri net Model Checking Contest](http://mcc.lip6.fr/), more specifically the 
 column:
  * Input: the name of the Petri net. **Note** the Petri nets with `-COL-`,
-   are irrelevant for this MACS2 course.
+   are irrelevant for this course.
  * estimated result: contains the known answer for Petri nets.
  * Examination: the category to which the answer belongs.
 
@@ -151,13 +153,13 @@ The exercise is now as follows.
     or how are you going to store the initial marking?
  1. Write/download whatever code for these datastructures is necessary, and
     declare those data structures in
-    [`andl_context_t`](https://github.com/Meijuh/MACS2/blob/master/src/andl.h),
+    [`andl_context_t`](https://github.com/Meijuh/SS/blob/master/src/andl.h),
     feel free to change any existing code there.
     The `andl_context_t` is a structure that is available while parsing ANDL files.
- 1. Modify the [parser](https://github.com/Meijuh/MACS2/blob/master/src/andl-parser.y)
+ 1. Modify the [parser](https://github.com/Meijuh/SS/blob/master/src/andl-parser.y)
     to fill the data structures accordingly.
  1. Implement a *Breadth-first* symbolic state space generator, starting
-    [here](https://github.com/Meijuh/MACS2/blob/master/src/macs2.c#L79).
+    [here](https://github.com/Meijuh/SS/blob/master/src/ss.c#L91).
  1. Make sure the return value of `sylvan_satcount` corresponds with the known
     answers in `raw-result-analysis.csv`, for as many Petri nets as possible
     (which you downloaded from Blackboard).
@@ -167,26 +169,21 @@ In this exercise we are going to build a CTL model checker, where atomic
 predicates are expressions for the fireability of Petri net transitions.
 The Petri net model checking contest specifies these kind of formulas in files
 named CTLFireability.[xml|txt]. The exact syntax and semantics is specified
-in [MCC2016-FormulaManual.pdf](https://github.com/Meijuh/MACS2/blob/master/MCC2016-FormulaManual.pdf),
+in [MCC2016-FormulaManual.pdf](https://github.com/Meijuh/SS/blob/master/MCC2016-FormulaManual.pdf),
 located in the root directory of this git repository. The syntax and semantics 
 are very much the same as in the lectures. However, whenever there is a
 predicate `is-fireable(t1,t2,)`, this actually means a disjunction; 
 `t1`, or `t2` should be fireable.
 
 Example code for parsing temporal logic formulas can be found here:
-https://github.com/Meijuh/MACS2/blob/master/src/macs2.c#L90-L212. The current
+https://github.com/Meijuh/SS/blob/master/src/ss.c#L107-L230. The current
 implementation (specifically function `parse_formula`) is an in-order traversal
 over the XML nodes, that simply prints the formula. The `parse_xml` function
 implements a bit of bootstrapping for printing the actual formulas, indeed
 there are multiple formulas in each CTLFireability.xml file.
 
-For this exercise an XML parser is necessary: `libxml2`, to install this parser
-run `apt-get install libxml2-dev`. To configure your macs2 project to use
-this new parser run `./macs2reconf`, and `./configure`, before running `make`.
-
-If you have checked out the most recent version of this GIT repository, you can
-now parse an XML file e.g. as follows:
-`src/macs2 examples/model.andl examples/CTLFireability.xml`.
+You can parse an XML file e.g. as follows:
+`src/ss examples/model.andl examples/CTLFireability.xml`.
 
 To get started with the CTL model checker it is probably easiest to change the
 in-order traversal to a post-order traversal and to create a simple parse tree.
@@ -205,6 +202,10 @@ do not need to support.
 1. As mentioned; the CTL formulas are also available in a textual (.txt)
    format, feel free to generate a parser based on an BNF grammar, if that
    is easier.
+1. When you need to transform a CTL formula to some normal form, make sure not to edit the parse tree in-place. Instead, construct an entire new tree, and then delete/free the old parse tree.
+1. Known answers to the CTL formulae can also be found in 
+[raw-results-analysis.csv](https://github.com/Meijuh/SS/blob/master/MCC/raw-result-analysis.csv), select `Examination=CTLFireability`. **Note** the answers `T`(=true), `F`(=false), and `?`(=unknown) are not given in numerical order, instead the order in which the answers are provided is: 0, 1, 10, 11, 12, 13, 14, 15, 2, 3, 4, 5, 6, 7, 8, 9. 
+1. The Model Checking Contest uses different semantics for Petri nets that have deadlocks than we do in this assignment. You only need to evaluate CTL formulae for Petri nets that do not have deadlocks. Whether a Petri net has a deadlock can be found if you select `Examination=ReachabilityDeadlock`. Here `T` means the Petri net does have dead locks.
 
 ## Exercise 5
 In this exercise you can choose what kind of feature you want to extend your
@@ -231,7 +232,7 @@ model checker with. You can of course implement more of the following.
  1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
     unprotect (with `sylvan_unprotect`) those before closing the
     variable scope. The pointers will become invalid after the scope is closed!
- 1. The default LACE deque size may be to small, even for smaller Petri nets.
+ 1. The default LACE deque size may be too small, even for smaller Petri nets.
     If you get unexpected segfaults, try increasing the deque size, e.g.
     `lace_init(n_workers, 40960000)`. I suggest changing this value anyway.
  1. The easiest way to declare a set of BDD variables is using functions like
@@ -251,10 +252,12 @@ model checker with. You can of course implement more of the following.
              sylvan_fprintdot(f, bdd);
              fclose(f);
         }
-    This allows you to make sure you constructed the correct BDD.
+    This allows you to make sure you constructed the correct BDD. A 
+    `.dot` file can be visualized with the program `xdot`, which 
+    should be in the Ubuntu repositories.
  1. Whenever you need a hashmap while parsing an ANDL file; I have found that
     [this one](https://github.com/petewarden/c_hashmap) is quite suitable.
-    To include it in a binary, e.g. the `macs2` binary, add the following line
-    to `src/Makefile.am`: `macs2_SOURCES   +=      hashmap.h hashmap.c`, and
+    To include it in a binary, e.g. the `ss` binary, add the following line
+    to `src/Makefile.am`: `ss_SOURCES   +=      hashmap.h hashmap.c`, and
     add `hashmap.h`, and `hashmap.c` to the `src` directory.
 

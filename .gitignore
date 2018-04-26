@@ -14,3 +14,9 @@ autom4te.cache
 stamp-h1
 
 *.o
+m4
+autotools
+/config.guess
+/config.sub
+/libtool
+/ltmain.sh

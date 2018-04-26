@@ -1,21 +1,21 @@
-bin_PROGRAMS = macs2
+.NOTPARALLEL:
 
-macs2_SOURCES	=	macs2.c 
-macs2_SOURCES	+= 	andl-lexer.l andl-parser.y 
-macs2_SOURCES	+=	util.h util.c
+bin_PROGRAMS = ss
 
-macs2_CFLAGS = $(SYLVAN_CFLAGS) $(XML_CFLAGS)
-macs2_LDADD = $(SYLVAN_LIBS) $(XML_LIBS)
+ss_SOURCES  = ss.c
+ss_SOURCES += util.h util.c
+ss_SOURCES += andl-lexer.l andl-parser.y
 
-macs2_YFLAGS   = -d
+ss_YFLAGS = -d
+ss_CFLAGS = $(SYLVAN_CFLAGS) $(XML_CFLAGS)
+ss_LDADD = $(SYLVAN_LIBS) $(XML_LIBS)
 
 EXTRA_DIST  = andl-lexer.c andl-lexer.h
-EXTRA_DIST += macs2-andl-parser.c macs2-andl-parser.h
+EXTRA_DIST += ss-andl-parser.c ss-andl-parser.h
 
 BUILT_SOURCES  = andl-lexer.c andl-lexer.h
-BUILT_SOURCES += macs2-andl-parser.c macs2-andl-parser.h
+BUILT_SOURCES += ss-andl-parser.c ss-andl-parser.h
 
 CLEANFILES  = andl-lexer.c andl-lexer.h
-CLEANFILES += macs2-andl-parser.c macs2-andl-parser.h
-
+CLEANFILES += ss-andl-parser.c ss-andl-parser.h
 

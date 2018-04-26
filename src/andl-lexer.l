@@ -5,7 +5,7 @@
 %option noyywrap noyyalloc noyyfree noyyrealloc fast noinput nounput
 %top{
 #include <config.h>
-#include <macs2-andl-parser.h>
+#include <ss-andl-parser.h>
 #include <util.h>
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

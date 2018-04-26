@@ -1,8 +1,9 @@
+ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src
 
-EXTRA_DIST  = ltsminreconf
+EXTRA_DIST  = ssreconf
 EXTRA_DIST += README.md
 
-doc_DATA = README.md 
+doc_DATA = README.md
 
 

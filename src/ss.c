@@ -6,7 +6,7 @@
 
 #include <andl.h>
 #include <andl-lexer.h>
-#include <macs2-andl-parser.h>
+#include <ss-andl-parser.h>
 #include <util.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -26,13 +26,19 @@ load_andl(andl_context_t *andl_context, const char *name)
         warn("Could not open file '%s'", name);
         res = 1;
     } else {
+        // initialize the lexer
         yyscan_t scanner;
         andl_lex_init(&scanner);
+        // make the lexer read the file f
         andl_set_in(f, scanner);
 
+        // zero the andl_context
         memset(andl_context, 0, sizeof(andl_context_t));
 
+        // parse the andl file
         const int pres = andl_parse(scanner, andl_context);
+
+        // destroy the lexer
         andl_lex_destroy(scanner);
         fclose(f);
         res = andl_context->error || pres;
@@ -53,12 +59,16 @@ init_sylvan()
     lace_init(n_workers, 0);
     lace_startup(0, NULL, NULL);
 
+    /* initialize the node table and cache with minimum size 2^20 entries, and
+     * maximum 2^25 entries */
     sylvan_init_package(1LL<<20,1LL<<25,1LL<<20,1LL<<25);
+
+    // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
 }
 
 /**
- * Deinialize Sylvan. If Sylvan is compiled with 
+ * Deinialize Sylvan. If Sylvan is compiled with
  * -DSYLVAN_STATS=ON, then statistics will be print,
  * such as the number of nodes in the node table.
  */
@@ -71,14 +81,14 @@ deinit_sylvan()
 }
 
 /**
- * Here you should implement whatever is required for the MACS2 lab class.
+ * Here you should implement whatever is required for the Software Science lab class.
  * \p andl_context: The user context that is used while parsing
- * the andl file. 
+ * the andl file.
  * The default implementation right now, is to print several
  * statistics of the parsed Petri net.
  */
 void
-do_macs2_things(andl_context_t *andl_context)
+do_ss_things(andl_context_t *andl_context)
 {
     warn("The name of the Petri net is: %s", andl_context->name);
     warn("There are %d transitions", andl_context->num_transitions);
@@ -87,6 +97,12 @@ do_macs2_things(andl_context_t *andl_context)
     warn("There are %d out arcs", andl_context->num_out_arcs);
 }
 
+/**
+ * \brief An in-order parser of the given XML node.
+ *
+ * The default implementation is to print the temporal logic formula
+ * on stderr.
+ */
 static int
 parse_formula(xmlNode *node)
 {
@@ -167,6 +183,9 @@ parse_formula(xmlNode *node)
     return res;
 }
 
+/**
+ * \brief recursively parse the given XML node.
+ */
 static int
 parse_xml(xmlNode *node)
 {
@@ -211,6 +230,11 @@ parse_xml(xmlNode *node)
     return res;
 }
 
+/**
+ * \brief parses the XML file name.
+ *
+ * \returns 0 on success, 1 on failure.
+ */
 static int
 load_xml(const char* name)
 {
@@ -229,7 +253,8 @@ load_xml(const char* name)
 }
 
 /**
- * \brief main.
+ * \brief main. First parse the .andl file is parsed. And optionally parse the
+ * XML file next.
  *
  * \returns 0 on success, 1 on failure.
  */
@@ -237,7 +262,7 @@ int main(int argc, char** argv)
 {
     int res;
     if (argc >= 2) {
-        andl_context_t andl_context; 
+        andl_context_t andl_context;
         const char *name = argv[1];
         res = load_andl(&andl_context, name);
         if (res) warn("Unable to parse file '%s'", name);
@@ -249,7 +274,8 @@ int main(int argc, char** argv)
                 if (res) warn("Unable to load xml '%s'", formulas);
             }
             init_sylvan();
-            do_macs2_things(&andl_context);
+            // execute the main body of code
+            do_ss_things(&andl_context);
             deinit_sylvan();
         }
     } else {
