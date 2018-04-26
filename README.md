@@ -206,6 +206,7 @@ do not need to support.
 1. Known answers to the CTL formulae can also be found in 
 [raw-results-analysis.csv](https://github.com/Meijuh/SS/blob/master/MCC/raw-result-analysis.csv), select `Examination=CTLFireability`. **Note** the answers `T`(=true), `F`(=false), and `?`(=unknown) are not given in numerical order, instead the order in which the answers are provided is: 0, 1, 10, 11, 12, 13, 14, 15, 2, 3, 4, 5, 6, 7, 8, 9. 
 1. The Model Checking Contest uses different semantics for Petri nets that have deadlocks than we do in this assignment. You only need to evaluate CTL formulae for Petri nets that do not have deadlocks. Whether a Petri net has a deadlock can be found if you select `Examination=ReachabilityDeadlock`. Here `T` means the Petri net does have dead locks.
+1. In some ANDL files the transition names do not correspond with those in CTLFireability.xml; you do not have to model check those Petri nets. An example of such a Petri net you may skip is `NeoElection-PT-2`, here transition `T-startSec_1` in `CTLFireability.xml` can not be matched in `model.andl`.
 
 ## Exercise 5
 In this exercise you can choose what kind of feature you want to extend your
