@@ -111,7 +111,7 @@ The lab files in this repository already provide three important aspects:
 For SS we think it is much easer to extend the ANDL parser, than it is to
 create a PNML parser. Feel free to create a PNML parser though.
 
-On Blackboard, under `Course Materials | Lab files | Petri nets` many
+On Blackboard, under `Course Materials | Project 1: Symbolic Model Checking | Model Checking Petri Nets (Week 2-4)` many
 example Petri nets have been made available in an archive. Every directory
 in the archive contains a Petri net specification. Important files for
 this exercise in each directory are:
