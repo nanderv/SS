@@ -65,7 +65,7 @@ project.
 ### SS lab files
  * Clone this git repository: `git clone https://github.com/Meijuh/SS.git`
  * Enter the git repository: `cd SS`
- * Generate config files: `./ss2reconf`
+ * Generate config files: `./ssreconf`
  * Configure lab class: `./configure`
  * Compile the lab files: `make`
  * Parse a simple Petri net in ANDL format: `src/ss examples/model.andl`,
