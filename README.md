@@ -215,19 +215,11 @@ model checker with. You can of course implement more of the following.
 1. Support for Cardinality predicates (as specified in `MCC2016-FormulaManual.pdf`).
 1. LTL model checking with support for LTLFireability.xml.
 1. Static variable ordering.
-1. Dynamic variable ordering.
 1. Deadlock detection.
-1. Advanced reachability algorithms, such as chaining, saturation, or any
-   algorithm where transition relations are applied in a particular order.
+1. Advanced reachability algorithms, such as chaining, or saturation.
 1. Unsafe Petri nets.
-1. Colored Petri nets.
-1. CEGAR.
-1. SAT solving.
-1. CTL model checking with forward traversals (see "CTL model checking based on
-   forward state traversal" on Blackboard).
-1. Partial Order Reduction with BDDs.
 1. Multi-valued Decision Diagrams (e.g. with sylvan-ldd.h)
-1. Any other category (as specified in `MCC2016-FormulaManual.pdf`).
+1. Any other MCC category (as specified in `MCC2016-FormulaManual.pdf`).
 
 ## Common Pitfalls and hints
  1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
