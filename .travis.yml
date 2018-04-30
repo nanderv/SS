@@ -33,7 +33,7 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update &&
     brew install
     bison
-    homebrew/science/hwloc; fi
+    hwloc; fi
   # install Sylvan from source
   - if [ ! -f "$HOME/deps/lib/libsylvan.a" ]; then
     wget "$SYLVAN_URL" -P /tmp &&
