@@ -41,7 +41,7 @@ install:
     pushd /tmp/sylvan-$SYLVAN_VERSION &&
     mkdir build &&
     cd build &&
-    cmake .. -DBUILD_SHARED_LIBS=OFF -DSYLVAN_BUILD_EXAMPLES=OFF -DSYLVAN_BUILD_DOCS=OFF -DSYLVAN_STATS=OFF -DCMAKE_INSTALL_PREFIX="$HOME/deps" &&
+    cmake .. -DBUILD_SHARED_LIBS=OFF -DSYLVAN_BUILD_EXAMPLES=OFF -DSYLVAN_BUILD_DOCS=OFF -DSYLVAN_STATS=OFF -DCMAKE_INSTALL_PREFIX="$HOME/deps" -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG --Wno-error=deprecated-declarations" &&
     make &&
     make install &&
     popd; fi
