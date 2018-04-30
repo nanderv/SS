@@ -11,7 +11,7 @@ if you at any step below run into an issue. Furthermore, there is also a
 [Travis CI build script](https://github.com/Meijuh/SS/blob/master/.travis.yml).
 which may help guide you in your journey described in the next sections 
 (Build statusses, with expected output can be found e.g. 
-[here](https://travis-ci.org/Meijuh/SS/builds/227652263)).
+[here](https://travis-ci.org/Meijuh/SS)). Completing exercises 3 (symbolic state space generation for Petri nets) and 4 (CTL model checking for Petri nets) is mandatory, doing exercise 5 will give you bonus points.
 
 ## Configuring
 To configure this autotools project on your machine, make sure
@@ -107,6 +107,7 @@ The lab files in this repository already provide three important aspects:
  * A parser for ANDL: https://github.com/Meijuh/SS/blob/master/src/andl-parser.y
  * Some borderplate code for printing the size of the Petri net specification:
    https://github.com/Meijuh/SS/blob/master/src/ss.c.
+ * Some borderplate code for parsing CTL formulae in XML format (for the next exercise).
 
 For SS we think it is much easer to extend the ANDL parser, than it is to
 create a PNML parser. Feel free to create a PNML parser though.
@@ -150,7 +151,8 @@ you are interested in the first value (243).
 The exercise is now as follows.
  1. Think about what data structures you require while parsing the
     ANDL files, e.g. what do you need to map names of places to BDD variables,
-    or how are you going to store the initial marking?
+    how are you going to store the initial marking, or how are you going to encode
+    the transition relations?
  1. Write/download whatever code for these datastructures is necessary, and
     declare those data structures in
     [`andl_context_t`](https://github.com/Meijuh/SS/blob/master/src/andl.h),
