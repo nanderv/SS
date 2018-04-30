@@ -51,7 +51,7 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/bison/bin:$PATH"; fi
 
 script:
-  - ./ss2reconf
+  - ./ssreconf
   - ./configure
   - make
   - src/ss examples/model.andl
