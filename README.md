@@ -222,6 +222,8 @@ model checker with. You can of course implement more of the following.
 1. Unsafe Petri nets.
 1. Multi-valued Decision Diagrams (e.g. with sylvan-ldd.h)
 1. Any other MCC category (as specified in `MCC2016-FormulaManual.pdf`).
+1. CTL + fairness
+1. CTL + counter examples
 
 ## Common Pitfalls and hints
  1. If you have protected pointers to BDDs (with `sylvan_protect`) make sure to
