@@ -46,13 +46,13 @@ typedef struct {
 
     map_t transitions;
     map_t places;
-  
 } andl_context_t;
 
 
 typedef struct {
   char place_name[512];
   int bddvar;
+  int marking;
 } places_struct_t;
 
 

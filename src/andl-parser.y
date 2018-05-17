@@ -123,7 +123,8 @@ pdec
             value = malloc(sizeof(places_struct_t));
             //            value->place_name = $1;
             snprintf(value->place_name, 512, "%s", $1);
-            value->bddvar = $3;
+            value->bddvar = andl_context->num_places * 2;
+            value->marking = $3;
             hashmap_put(andl_context->places, value->place_name, value);
 
             andl_context->num_places++;

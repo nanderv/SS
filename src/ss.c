@@ -12,6 +12,28 @@
 #include <libxml/tree.h>
 
 #include <hashmap.h>
+
+
+int
+list_places(char* item, places_struct_t* i)
+{
+  printf("%s@bddvar(%i): %i\n", i->place_name, i->bddvar, i->marking);
+  return MAP_OK;
+}
+
+int
+list_transitions(char* item, transitions_struct_t* t)
+{
+  printf("%i->%s->%i\n", t->num_in_arcs, t->transition_name, t->num_out_arcs);
+  for(int i=0; i<t->num_in_arcs;i++) {
+    int bddvar = t->in_arcs[i];
+  }
+    for(int i=0; i<t->num_out_arcs;i++) {
+    int bddvar = t->out_arcs[i];
+  }
+  return MAP_OK;
+}
+
 /**
  * Load the andl file in \p name.
  * \p andl_context: The user context available when paring the andl file.
@@ -49,6 +71,11 @@ load_andl(andl_context_t *andl_context, const char *name)
         andl_lex_destroy(scanner);
         fclose(f);
         res = andl_context->error || pres;
+
+        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
+        item = malloc(sizeof(places_struct_t));
+        hashmap_iterate(andl_context->places, *list_places, (void**)(&item));
+        hashmap_iterate(andl_context->transitions, *list_transitions, (void**)(&item));
 
     }
 
