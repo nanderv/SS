@@ -119,6 +119,7 @@ pdecs
 /* single place declaration */
 pdec
     :   IDENT ASSIGN NUMBER SEMICOLON {
+      hashmap_put(andl_context->places, z );
             andl_context->num_places++;
             free($1);
         }

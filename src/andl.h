@@ -1,3 +1,5 @@
+#include <hashmap.h>
+
 #ifndef ANDL_H
 #define ANDL_H
 
@@ -41,6 +43,29 @@ typedef struct {
 
     // whether an error has occured during parsing
     int error;
+
+    map_t transitions;
+    map_t places;
+  
 } andl_context_t;
+
+
+typedef struct {
+  char place_name;
+  int bddvar;
+} places_struct_t;
+
+typedef struct {
+  char transition;
+  map_t in_arcs;
+  map_t out_arcs;
+} transitions_struct_t;
+
+typedef struct {
+  char source;
+  char destination;
+  arc_dir_t direction;
+} arc_struct_t;
+
 
 #endif
