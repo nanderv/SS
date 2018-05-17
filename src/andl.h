@@ -55,16 +55,15 @@ typedef struct {
   int bddvar;
 } places_struct_t;
 
-typedef struct {
-  char transition;
-  map_t in_arcs;
-  map_t out_arcs;
-} transitions_struct_t;
+
 
 typedef struct {
-  int bddvar;
-  arc_dir_t direction;
-} arc_struct_t;
+  char transition_name[512];
+  int in_arcs[512];
+  int out_arcs[512];
+  int num_in_arcs;
+  int num_out_arcs;
+} transitions_struct_t;
 
 
 #endif

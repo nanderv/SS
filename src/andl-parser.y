@@ -150,6 +150,17 @@ tdec
             }
             /* copy the name of the current transition */
             andl_context->current_trans = strdup($1);
+
+
+            transitions_struct_t* transition;
+            transition = malloc(sizeof(transitions_struct_t));
+            transition->num_in_arcs = 0;
+            transition->num_out_arcs = 0;
+            snprintf(transition->transition_name, 512, "%s", andl_context->current_trans);
+
+            hashmap_put(andl_context->transitions, transition->transition_name, transition);
+            
+            
             if (andl_context->current_trans == NULL) {
                 warn("out of memory");
                 YYABORT;
@@ -175,6 +186,12 @@ arcs
 /* parse a single arc */
 arc
     :   LBRAC IDENT op const_function RBRAC {
+            places_struct_t* place;
+            transitions_struct_t* transition;
+            int error;
+            place = malloc(sizeof(places_struct_t));
+            transition = malloc(sizeof(transitions_struct_t));
+            
             if ($4 != 1) {
                 warn(
                     "Not a 1-safe net."
@@ -185,9 +202,17 @@ arc
             }
             /* Here you can do something with
              * andl_context->current_trans */
+            error = hashmap_get( andl_context->places, $2, (void**)(&place));
+            error = hashmap_get( andl_context->transitions, andl_context->current_trans, (void**)(&transition));
             if ($3 == ARC_IN) {
+                transition->in_arcs[transition->num_in_arcs] = place->bddvar;
+                transition->num_in_arcs++;
+                           
                 andl_context->num_in_arcs++;
             } else { // $3 == ARC_OUT
+                transition->out_arcs[transition->num_out_arcs] = place->bddvar;
+                transition->num_out_arcs++;
+
                 andl_context->num_out_arcs++;
             }
            free($2);
