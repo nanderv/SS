@@ -51,7 +51,7 @@ typedef struct {
 
 
 typedef struct {
-  char place_name;
+  char place_name[512];
   int bddvar;
 } places_struct_t;
 
@@ -62,8 +62,7 @@ typedef struct {
 } transitions_struct_t;
 
 typedef struct {
-  char source;
-  char destination;
+  int bddvar;
   arc_dir_t direction;
 } arc_struct_t;
 

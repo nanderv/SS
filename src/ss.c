@@ -11,6 +11,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#include <hashmap.h>
 /**
  * Load the andl file in \p name.
  * \p andl_context: The user context available when paring the andl file.
@@ -35,6 +36,12 @@ load_andl(andl_context_t *andl_context, const char *name)
         // zero the andl_context
         memset(andl_context, 0, sizeof(andl_context_t));
 
+
+        // initialize the andl_context
+        andl_context->transitions = hashmap_new();
+        andl_context->places = hashmap_new();
+        // mmalloc?
+        
         // parse the andl file
         const int pres = andl_parse(scanner, andl_context);
 
@@ -42,6 +49,7 @@ load_andl(andl_context_t *andl_context, const char *name)
         andl_lex_destroy(scanner);
         fclose(f);
         res = andl_context->error || pres;
+
     }
 
     return res;
