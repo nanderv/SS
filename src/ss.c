@@ -115,6 +115,52 @@ deinit_sylvan()
     lace_exit();
 }
 
+
+BDD
+rel_prod(BDD states, BDD relation, BDD x, BDDMAP map) {
+  LACE_ME;
+  MTBDDMAP map = sylvan_map_empty();
+
+  map = sylvan_map_add(map, 1, sylvan_ithvar(0) );
+  map = sylvan_map_add(map, 3, sylvan_ithvar(2) );
+  map = sylvan_map_add(map, 5, sylvan_ithvar(4) );
+  
+  return sylvan_compose( sylvan_exists( sylvan_and( P, Q) , x), map);
+}
+
+BDD
+reachable_states(BDD initial_states, int n, BDD transitions)
+{
+  // I: initial states
+  // N: number of subtransitions
+  // R: subtransitions
+  // return V: reachable states
+
+  BDD v_prev = sylvan_false();
+  BDD v = initial_states;
+
+  while (v_prev != v){
+    v_prev = v;
+    for(int 0; i<n; i++) {
+      BDD r_i = transitions[i];
+      BDD v = sylvan_or( v, rel_prod(v, r_i) );
+    }
+    
+
+  }
+  
+  
+  
+  // have a set of reachable states v_old
+  // next is the relational product of elements in v_old with transitions applied.
+  // keep expanding v_old until you reach a fixpoint
+
+  // 
+  // states: a marking of the net. so for every place there is a symbol- set to true if it is marked, or false if it isnt.
+  // transitions: possible next markings of the net, given a current marking
+  // so there is one for every transition. 
+  
+}
 /**
  * Here you should implement whatever is required for the Software Science lab class.
  * \p andl_context: The user context that is used while parsing
@@ -131,7 +177,18 @@ do_ss_things(andl_context_t *andl_context)
     warn("There are %d in arcs", andl_context->num_in_arcs);
     warn("There are %d out arcs", andl_context->num_out_arcs);
 
+    BDD bdd = sylvan_true;
+    sylvan_protect(&bdd);
+    BDDSET set = sylvan_set_empty();
+    sylvan_protect(&set);
+    BDDMAP map = sylvan_map_empty();
+    sylvan_protect(&map);
 
+    // do stuff
+    
+    sylvan_unprotect(&bdd);
+    sylvan_unprotect(&set);
+    sylvan_unprotect(&map);
     // reachability
     // 1. construct a bdd
     // 2. 
