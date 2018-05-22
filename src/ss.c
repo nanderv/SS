@@ -119,31 +119,34 @@ deinit_sylvan()
 BDD
 rel_prod(BDD states, BDD relation, BDD x, BDDMAP map) {
   LACE_ME;
+  /*
   MTBDDMAP map = sylvan_map_empty();
 
   map = sylvan_map_add(map, 1, sylvan_ithvar(0) );
   map = sylvan_map_add(map, 3, sylvan_ithvar(2) );
-  map = sylvan_map_add(map, 5, sylvan_ithvar(4) );
+  map = sylvan_map_add(map, 5, sylvan_ithvar(4) );*/
   
-  return sylvan_compose( sylvan_exists( sylvan_and( P, Q) , x), map);
+  return sylvan_compose( sylvan_exists( sylvan_and( states, relation) , x), map);
 }
 
 BDD
-reachable_states(BDD initial_states, int n, BDD transitions)
+reachable_states(BDD initial_states, int n, BDD transitions[], BDDMAP map)
 {
+  LACE_ME;
   // I: initial states
   // N: number of subtransitions
   // R: subtransitions
   // return V: reachable states
-
-  BDD v_prev = sylvan_false();
+  
+  BDD v_prev = sylvan_false;
   BDD v = initial_states;
 
   while (v_prev != v){
     v_prev = v;
-    for(int 0; i<n; i++) {
+    for(int i=0; i<n; i++) {
       BDD r_i = transitions[i];
-      BDD v = sylvan_or( v, rel_prod(v, r_i) );
+      BDDSET x = sylvan_set_empty();
+      BDD v = sylvan_or( v, rel_prod(v, r_i, x, map) );
     }
     
 
