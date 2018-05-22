@@ -31,6 +31,14 @@ get_initial_marking(BDD* bdd, places_struct_t* i)
 
 
 int
+get_transitions(BDD* bdd, transitions_struct_t* i)
+{
+  LACE_ME;
+  return MAP_OK;
+}
+
+
+int
 list_places(char* item, places_struct_t* i)
 {
   printf("%s@bddvar(%i): %i\n", i->place_name, i->bddvar, i->marking);
@@ -208,7 +216,9 @@ do_ss_things(andl_context_t *andl_context)
     BDD initial_marking = sylvan_false;
     sylvan_protect(&initial_marking);
     hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(initial_marking));
-    hashmap_iterate(andl_context->transitions, *get_transitions, (void**)(&transitions));
+
+    BDD transitions[andl_context->num_transitions];
+    hashmap_iterate(andl_context->transitions, *get_transitions, (void**)(transitions));
 
     // build the map used for substitions in the sylvan_compose function
     // remember that all prime variables are at i+1
