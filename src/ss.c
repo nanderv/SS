@@ -15,6 +15,22 @@
 
 
 int
+get_initial_marking(BDD* bdd, places_struct_t* i)
+{
+  LACE_ME;
+  BDDVAR var;
+  if(i->marking==1) {
+    var = sylvan_ithvar(i->bddvar);
+  }
+  else {
+    var = sylvan_nithvar(i->bddvar);
+  }
+  bdd = sylvan_and(bdd, var);
+  return MAP_OK;
+}
+
+
+int
 list_places(char* item, places_struct_t* i)
 {
   printf("%s@bddvar(%i): %i\n", i->place_name, i->bddvar, i->marking);
@@ -137,6 +153,9 @@ reachable_states(BDD initial_states, int n, BDD transitions[], BDDMAP map)
   // N: number of subtransitions
   // R: subtransitions
   // return V: reachable states
+
+  BDDSET x = sylvan_set_empty();
+
   
   BDD v_prev = sylvan_false;
   BDD v = initial_states;
@@ -145,7 +164,6 @@ reachable_states(BDD initial_states, int n, BDD transitions[], BDDMAP map)
     v_prev = v;
     for(int i=0; i<n; i++) {
       BDD r_i = transitions[i];
-      BDDSET x = sylvan_set_empty();
       BDD v = sylvan_or( v, rel_prod(v, r_i, x, map) );
     }
     
@@ -187,14 +205,27 @@ do_ss_things(andl_context_t *andl_context)
     BDDMAP map = sylvan_map_empty();
     sylvan_protect(&map);
 
-    // do stuff
+    BDD initial_marking = sylvan_false;
+    sylvan_protect(&initial_marking);
+    hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(initial_marking));
+    hashmap_iterate(andl_context->transitions, *get_transitions, (void**)(&transitions));
+
+    // build the map used for substitions in the sylvan_compose function
+    // remember that all prime variables are at i+1
+    for(int i = 0; i < andl_context->num_places; i++) {
+      map = sylvan_map_add(map, i+1, sylvan_ithvar(i));
+    }
+
     
+    //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
+    //  item = malloc(sizeof(places_struct_t));
+
+
+    
+    // do stuff
     sylvan_unprotect(&bdd);
     sylvan_unprotect(&set);
     sylvan_unprotect(&map);
-    // reachability
-    // 1. construct a bdd
-    // 2. 
 }
 
 /**
