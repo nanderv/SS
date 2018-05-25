@@ -20,3 +20,6 @@ autotools
 /config.sub
 /libtool
 /ltmain.sh
+/.idea
+cmake-build-debug
+build

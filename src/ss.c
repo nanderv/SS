@@ -355,6 +355,110 @@ parse_formula(xmlNode *node)
     return res;
 }
 
+
+
+
+
+
+static BDD*
+parse_formula_BU(xmlNode *node, map_t *transitions)
+{
+  LACE_ME;
+
+    // first check if the node is not a NULL pointer.
+    if (node == NULL) {       
+        warn("Invalid XML");
+    // only parse xml nodes, skip other parts of the XML file.
+    } else if (node->type != XML_ELEMENT_NODE) return parse_formula_BU(xmlNextElementSibling(node), transitions);
+    // parse forAll
+    else if (xmlStrcmp(node->name, (const xmlChar*) "all-paths") == 0) {
+        fprintf(stderr, "A ");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse Exists
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "exists-path") == 0) {
+        fprintf(stderr, "E ");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse Globally
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "globally") == 0) {
+        fprintf(stderr, "G ");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse Finally
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "finally") == 0) {
+        fprintf(stderr, "F ");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse neXt
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "next") == 0) {
+        fprintf(stderr, "X ");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse Until
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
+        fprintf(stderr, "(");
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+        fprintf(stderr, ") U (");
+        BDD* res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions);
+        fprintf(stderr, ")");
+    // parse before
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse reach
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "reach") == 0) {
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse negation
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "negation") == 0) {
+        return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), transitions));
+        fprintf(stderr, ")");
+    // parse conjunction
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node),transitions);
+        BDD* res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions);
+        return sylvan_and(res, res2);
+    // parse disjunction
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "disjunction") == 0) {
+        BDD* res = parse_formula_BU(xmlFirstElementChild(node), transitions);
+        BDD* res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions);
+        return sylvan_or(res, res2);
+    // parse is-fireable: atomic predicate!
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "is-fireable") == 0) {
+        return parse_formula_BU(xmlFirstElementChild(node), transitions);
+    // parse transition (part of the atomic predicate)
+    } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
+        BDD* res = sylvan_false;
+        for (xmlNode *transition = node; transition != NULL;
+                transition = xmlNextElementSibling(transition)) {
+            transitions_struct_t transitionD;
+            hashmap_get(transitions, xmlNodeGetContent(transition), (void**) (&transitionD));
+            BDD* intermediate = sylvan_true;
+            for (int i=0;i<transitionD.num_in_arcs; i++) {
+                intermediate = sylvan_and(intermediate, sylvan_ithvar(transitionD.in_arcs[i]));
+            }
+            for (int i=0;i<transitionD.num_out_arcs; i++) {
+                intermediate = sylvan_and(intermediate, sylvan_nithvar(transitionD.out_arcs[i]));
+            }
+            res = sylvan_or(res, intermediate);
+            fprintf(stderr, "%s,", xmlNodeGetContent(transition));
+        }
+        return res;
+    } else {
+        warn("Invalid xml node '%s'", node->name);
+    }
+    return sylvan_true;
+}
+
+
+BDD* checkEU(BDD* left, BDD* right, BDD* model)
+{
+    return sylvan_true;
+}
+
+BDD* checkEG(BDD* left, BDD* model)
+{
+    return sylvan_true;
+}
+
+BDD* checkEX(BDD* left, BDD* model)
+{
+    return sylvan_true;
+}
 /**
  * \brief recursively parse the given XML node.
  */
