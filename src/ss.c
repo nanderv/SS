@@ -12,7 +12,10 @@
 #include <libxml/tree.h>
 
 #include <hashmap.h>
-
+BDD transition_in_arcs()
+{
+  return sylvan_false;
+}
 
 int
 get_initial_marking(BDD* bdd, places_struct_t* i)
@@ -32,12 +35,13 @@ get_initial_marking(BDD* bdd, places_struct_t* i)
   return MAP_OK;
 }
 
-
 int
-get_transitions(int* bdd, places_struct_t* i)
+get_transitions(BDD* r[], transitions_struct_t* i)
 {
   LACE_ME;
-  *bdd += 1;
+  BDD t = sylvan_false;
+
+  
   return MAP_OK;
 }
 
@@ -119,11 +123,12 @@ load_andl(andl_context_t *andl_context, const char *name)
         fclose(f);
         res = andl_context->error || pres;
 
+        /*
         places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
         item = malloc(sizeof(places_struct_t));
         hashmap_iterate(andl_context->places, *list_places, (void**)(&item));
         hashmap_iterate(andl_context->transitions, *list_transitions, (void**)(&item));
-
+        */
     }
 
     return res;
@@ -239,16 +244,23 @@ do_ss_things(andl_context_t *andl_context)
     BDD initial_marking = sylvan_true;
     sylvan_protect(&initial_marking);
 
-    
+    /*
     hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(&initial_marking));
     export_bdd(initial_marking, 0);
 
-    //BDD transitions[andl_context->num_transitions];
-    //int transitions = 0;
-    //printf("transitions=%i\n", transitions);
-    //hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
-    //printf("transitions=%i\n", transitions);
+    BDD transitions[andl_context->num_transitions];
 
+    //    printf("transitions=%i\n", transitions);
+    for(int i = 0; i < andl_context->num_transitions; i++) {
+      char key[512];
+      transitions_struct_t* value = malloc(sizeof(transitions_struct_t));
+      sprintf(key, 512, "%i", i);
+      //      hashmap_get(andl_context->transitions, key, (void**)(&value));
+      //      sprintf(stdout, 512, "%s\n", value->transition_name);
+    }
+    hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
+    //    printf("transitions=%i\n", transitions);
+    */
     
     // build the map used for substitions in the sylvan_compose function
     // remember that all prime variables are at i+1
