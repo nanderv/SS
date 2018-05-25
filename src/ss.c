@@ -20,20 +20,24 @@ get_initial_marking(BDD* bdd, places_struct_t* i)
   LACE_ME;
   BDDVAR var;
   if(i->marking==1) {
+    printf("1=%i\n", i->bddvar);
     var = sylvan_ithvar(i->bddvar);
   }
   else {
+    printf("0=%i\n", i->bddvar);
     var = sylvan_nithvar(i->bddvar);
   }
-  bdd = sylvan_and(bdd, var);
+
+  *bdd = sylvan_and(*bdd, var);
   return MAP_OK;
 }
 
 
 int
-get_transitions(BDD* bdd, transitions_struct_t* i)
+get_transitions(int* bdd, places_struct_t* i)
 {
   LACE_ME;
+  *bdd += 1;
   return MAP_OK;
 }
 
@@ -56,6 +60,25 @@ list_transitions(char* item, transitions_struct_t* t)
     int bddvar = t->out_arcs[i];
   }
   return MAP_OK;
+}
+
+void export_bdd(BDD bdd, int fnumber) {
+  int i = 0;
+  char b[256];
+
+
+  char fnumber_str[12];
+  sprintf(fnumber_str, "%d", fnumber);
+  
+  char fname[12];
+  strcpy(fname, "bdd_");
+  strcat(fname, fnumber_str);
+  strcat(fname, ".dot");
+  snprintf(b, 256, fname, i);
+  FILE *f = fopen(b, "w+");
+  //sylvan_fprintdot(f, bdd);
+  mtbdd_fprintdot_nc(f, bdd);
+  fclose(f);
 }
 
 /**
@@ -213,19 +236,27 @@ do_ss_things(andl_context_t *andl_context)
     BDDMAP map = sylvan_map_empty();
     sylvan_protect(&map);
 
-    BDD initial_marking = sylvan_false;
+    BDD initial_marking = sylvan_true;
     sylvan_protect(&initial_marking);
-    hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(initial_marking));
 
-    BDD transitions[andl_context->num_transitions];
-    hashmap_iterate(andl_context->transitions, *get_transitions, (void**)(transitions));
+    
+    hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(&initial_marking));
+    export_bdd(initial_marking, 0);
 
+    //BDD transitions[andl_context->num_transitions];
+    //int transitions = 0;
+    //printf("transitions=%i\n", transitions);
+    //hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
+    //printf("transitions=%i\n", transitions);
+
+    
     // build the map used for substitions in the sylvan_compose function
     // remember that all prime variables are at i+1
     for(int i = 0; i < andl_context->num_places; i++) {
       map = sylvan_map_add(map, i+1, sylvan_ithvar(i));
     }
 
+    
     
     //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
     //  item = malloc(sizeof(places_struct_t));
