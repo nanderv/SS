@@ -1,1 +1,0 @@
-/usr/bin/cc    CMakeFiles/SS.dir/ss.c.o CMakeFiles/SS.dir/andl-lexer.c.o CMakeFiles/SS.dir/andl-parser.c.o CMakeFiles/SS.dir/util.c.o  -o SS -Wl,-rpath,/usr/local/lib64 /usr/local/lib64/libsylvan.so /usr/lib/libxml2.so /usr/lib/libfl.so -lpthread -lhwloc 

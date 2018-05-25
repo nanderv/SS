@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-cc436145eefb0276b23cf484b44b9b27 src/andl-lexer.c
-8c3ca3274697c17669d7a4ce211ae518 src/andl-parser.c
