@@ -12,78 +12,9 @@
 #include <libxml/tree.h>
 
 #include <hashmap.h>
-BDD transition_in_arcs()
-{
-  return sylvan_false;
-}
 
-int
-get_initial_marking(BDD* bdd, places_struct_t* i)
-{
-  LACE_ME;
-  BDDVAR var;
-  if(i->marking==1) {
-    printf("1=%i\n", i->bddvar);
-    var = sylvan_ithvar(i->bddvar);
-  }
-  else {
-    printf("0=%i\n", i->bddvar);
-    var = sylvan_nithvar(i->bddvar);
-  }
-
-  *bdd = sylvan_and(*bdd, var);
-  return MAP_OK;
-}
-
-int
-get_transitions(BDD* r[], transitions_struct_t* i)
-{
-  LACE_ME;
-  BDD t = sylvan_false;
-
-  
-  return MAP_OK;
-}
-
-
-int
-list_places(char* item, places_struct_t* i)
-{
-  printf("%s@bddvar(%i): %i\n", i->place_name, i->bddvar, i->marking);
-  return MAP_OK;
-}
-
-int
-list_transitions(char* item, transitions_struct_t* t)
-{
-  printf("%i->%s->%i\n", t->num_in_arcs, t->transition_name, t->num_out_arcs);
-  for(int i=0; i<t->num_in_arcs;i++) {
-    int bddvar = t->in_arcs[i];
-  }
-    for(int i=0; i<t->num_out_arcs;i++) {
-    int bddvar = t->out_arcs[i];
-  }
-  return MAP_OK;
-}
-
-void export_bdd(BDD bdd, int fnumber) {
-  int i = 0;
-  char b[256];
-
-
-  char fnumber_str[12];
-  sprintf(fnumber_str, "%d", fnumber);
-  
-  char fname[12];
-  strcpy(fname, "bdd_");
-  strcat(fname, fnumber_str);
-  strcat(fname, ".dot");
-  snprintf(b, 256, fname, i);
-  FILE *f = fopen(b, "w+");
-  //sylvan_fprintdot(f, bdd);
-  mtbdd_fprintdot_nc(f, bdd);
-  fclose(f);
-}
+#include <petri-helpers.h>
+#include <bdd-helpers.h>
 
 /**
  * Load the andl file in \p name.
@@ -123,12 +54,9 @@ load_andl(andl_context_t *andl_context, const char *name)
         fclose(f);
         res = andl_context->error || pres;
 
-        /*
-        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
-        item = malloc(sizeof(places_struct_t));
-        hashmap_iterate(andl_context->places, *list_places, (void**)(&item));
-        hashmap_iterate(andl_context->transitions, *list_transitions, (void**)(&item));
-        */
+        petri_list_places(andl_context->places);
+        petri_list_transitions(andl_context->transitions);
+
     }
 
     return res;
@@ -167,57 +95,6 @@ deinit_sylvan()
     lace_exit();
 }
 
-
-BDD
-rel_prod(BDD states, BDD relation, BDD x, BDDMAP map) {
-  LACE_ME;
-  /*
-  MTBDDMAP map = sylvan_map_empty();
-
-  map = sylvan_map_add(map, 1, sylvan_ithvar(0) );
-  map = sylvan_map_add(map, 3, sylvan_ithvar(2) );
-  map = sylvan_map_add(map, 5, sylvan_ithvar(4) );*/
-  
-  return sylvan_compose( sylvan_exists( sylvan_and( states, relation) , x), map);
-}
-
-BDD
-reachable_states(BDD initial_states, int n, BDD transitions[], BDDMAP map)
-{
-  LACE_ME;
-  // I: initial states
-  // N: number of subtransitions
-  // R: subtransitions
-  // return V: reachable states
-
-  BDDSET x = sylvan_set_empty();
-
-  
-  BDD v_prev = sylvan_false;
-  BDD v = initial_states;
-
-  while (v_prev != v){
-    v_prev = v;
-    for(int i=0; i<n; i++) {
-      BDD r_i = transitions[i];
-      BDD v = sylvan_or( v, rel_prod(v, r_i, x, map) );
-    }
-    
-
-  }
-  
-  
-  
-  // have a set of reachable states v_old
-  // next is the relational product of elements in v_old with transitions applied.
-  // keep expanding v_old until you reach a fixpoint
-
-  // 
-  // states: a marking of the net. so for every place there is a symbol- set to true if it is marked, or false if it isnt.
-  // transitions: possible next markings of the net, given a current marking
-  // so there is one for every transition. 
-  
-}
 /**
  * Here you should implement whatever is required for the Software Science lab class.
  * \p andl_context: The user context that is used while parsing
@@ -241,26 +118,26 @@ do_ss_things(andl_context_t *andl_context)
     BDDMAP map = sylvan_map_empty();
     sylvan_protect(&map);
 
-    BDD initial_marking = sylvan_true;
+    BDD initial_marking = petri_get_marking(andl_context->places);
     sylvan_protect(&initial_marking);
 
-    /*
-    hashmap_iterate(andl_context->places, *get_initial_marking, (void**)(&initial_marking));
     export_bdd(initial_marking, 0);
 
     BDD transitions[andl_context->num_transitions];
 
-    //    printf("transitions=%i\n", transitions);
     for(int i = 0; i < andl_context->num_transitions; i++) {
       char key[512];
       transitions_struct_t* value = malloc(sizeof(transitions_struct_t));
-      sprintf(key, 512, "%i", i);
+      //      sprintf(key, 512, "%i", i);
       //      hashmap_get(andl_context->transitions, key, (void**)(&value));
       //      sprintf(stdout, 512, "%s\n", value->transition_name);
     }
-    hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
+    //    hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
+
+
+
+    
     //    printf("transitions=%i\n", transitions);
-    */
     
     // build the map used for substitions in the sylvan_compose function
     // remember that all prime variables are at i+1

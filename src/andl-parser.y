@@ -158,10 +158,10 @@ tdec
             transition->num_in_arcs = 0;
             transition->num_out_arcs = 0;
             snprintf(transition->transition_name, 512, "%s", andl_context->current_trans);
+            transition->number = andl_context->num_transitions - 1;
 
             hashmap_put(andl_context->transitions, transition->transition_name, transition);
-            
-            
+
             if (andl_context->current_trans == NULL) {
                 warn("out of memory");
                 YYABORT;
