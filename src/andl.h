@@ -46,8 +46,16 @@ typedef struct {
 
     map_t transitions;
     map_t places;
+    map_t in_arcs;
+    map_t out_arcs;
 } andl_context_t;
 
+typedef struct {
+  char key[8];
+  int bddvar;
+  char transition_name[512];
+  arc_dir_t direction;
+} arc_struct_t;
 
 typedef struct {
   char place_name[512];
@@ -55,10 +63,9 @@ typedef struct {
   int marking;
 } places_struct_t;
 
-
-
 typedef struct {
   char transition_name[512];
+  int number;
   int in_arcs[512];
   int out_arcs[512];
   int num_in_arcs;
