@@ -250,7 +250,7 @@ parse_formula(xmlNode *node)
 */
 
 // TODO: Prev function
-BDD MYprev(BDD in, BDD model){
+BDD MYprev(BDD in, BDD model, BDD relation){
     LACE_ME;
 
     return in;
@@ -258,37 +258,37 @@ BDD MYprev(BDD in, BDD model){
 
 
 
-BDD checkEU(BDD left, BDD right, BDD model)
+BDD checkEU(BDD left, BDD right, BDD model, BDD relation)
 {
     LACE_ME;
     BDD z = right;
     BDD old = sylvan_false;
     while ( z != old) {
         old = z;
-        z = sylvan_or(z, sylvan_and(left, MYprev(z, model)));
+        z = sylvan_or(z, sylvan_and(left, MYprev(z, model, relation)));
     }
     return z;
 }
 
-BDD checkEG(BDD left, BDD model)
+BDD checkEG(BDD left, BDD model, BDD relation)
 {
     LACE_ME;
     BDD z = left;
     BDD old = sylvan_false;
     while ( z != old) {
         old = z;
-        z = sylvan_and(z, MYprev(z, model));
+        z = sylvan_and(z, MYprev(z, model, relation));
     }
     return z;}
 
-BDD checkEX(BDD left, BDD model)
+BDD checkEX(BDD left, BDD model, BDD relation)
 {
     LACE_ME;
-    return MYprev(left, model);
+    return MYprev(left, model, relation);
 }
 
-BDD checkEF(BDD left, BDD model){
- return checkEU(sylvan_true, left, model);
+BDD checkEF(BDD left, BDD model, BDD relation){
+ return checkEU(sylvan_true, left, model, relation);
 }
 
 
@@ -296,7 +296,7 @@ BDD checkEF(BDD left, BDD model){
 * Recursive descent for formula parsing, thus validating the formula.
 */
 BDD
-parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD model)
+parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD model, BDD relation)
 {
     LACE_ME;
 
@@ -309,64 +309,64 @@ parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD model)
     if (node == NULL) {       
         warn("Invalid XML");
     // only parse xml nodes, skip other parts of the XML file.
-    } else if (node->type != XML_ELEMENT_NODE) return parse_formula_BU(xmlNextElementSibling(node), transitions,0, model);
+    } else if (node->type != XML_ELEMENT_NODE) return parse_formula_BU(xmlNextElementSibling(node), transitions,0, model, relation);
     // parse forAll
     else if (xmlStrcmp(node->name, (const xmlChar*) "all-paths") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions, 1, model);
+        return parse_formula_BU(xmlFirstElementChild(node), transitions, 1, model, relation);
     // parse Exists
     } else if (xmlStrcmp(node->name, (const xmlChar*) "exists-path") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions, 0, model);
+        return parse_formula_BU(xmlFirstElementChild(node), transitions, 0, model, relation);
     // parse Globally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "globally") == 0) {
         if (!isAll) // EG
         {
-            return checkEG(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model), model);
+            return checkEG(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation), model, relation);
         } else { // AG
-            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model));
-            im1 = checkEF(im1, model);
+            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation));
+            im1 = checkEF(im1, model, relation);
             return sylvan_not(im1);
         }
     // parse Finally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "finally") == 0) {
         if (!isAll) // EF
         {
-            return checkEF(parse_formula_BU(xmlFirstElementChild(node), transitions, 0, model), model);
+            return checkEF(parse_formula_BU(xmlFirstElementChild(node), transitions, 0, model, relation), model, relation);
         } else { // AF
-            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model));
-            im1 = checkEG(im1, model);
+            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation));
+            im1 = checkEG(im1, model, relation);
             return sylvan_not(im1);
         }
     // parse neXt
     } else if (xmlStrcmp(node->name, (const xmlChar*) "next") == 0) {
-        return checkEX(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model), model);
+        return checkEX(parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation), model, relation);
     // parse Until
     } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, model);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model);
-        return checkEU(res, res2, model);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model, relation);
+        return checkEU(res, res2, model, relation);
     // parse before
     } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, model);
+        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation);
     // parse reach
     } else if (xmlStrcmp(node->name, (const xmlChar*) "reach") == 0) {
-        return  parse_formula_BU(xmlFirstElementChild(node), transitions,0, model);
+        return  parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation);
     // parse negation
     } else if (xmlStrcmp(node->name, (const xmlChar*) "negation") == 0) {
-        return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), transitions,0, model));
+        return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation));
         fprintf(stderr, ")");
     // parse conjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node),transitions,0, model);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node),transitions,0, model, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model, relation);
         return sylvan_and(res, res2);
     // parse disjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "disjunction") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, model);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, model, relation);
         return sylvan_or(res, res2);
     // parse is-fireable: atomic predicate!
     } else if (xmlStrcmp(node->name, (const xmlChar*) "is-fireable") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, model);
+        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, model, relation);
     // parse transition (part of the atomic predicate)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
         BDD res = sylvan_false;
@@ -396,7 +396,7 @@ parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD model)
  * \brief recursively parse the given XML node.
  */
 static int
-parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD model)
+parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD model, BDD relation)
 {
     LACE_ME;
     int res = 0;
@@ -405,32 +405,32 @@ parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD model)
         res = 1;
         warn("Invalid XML");
     // only parse xml nodes, skip other parts of the XML file.
-    } else if (node->type != XML_ELEMENT_NODE) res = parse_xml(xmlNextElementSibling(node), transitions,  isAll,  model);
+    } else if (node->type != XML_ELEMENT_NODE) res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, model, relation);
     // parse property-set
     else if (xmlStrcmp(node->name, (const xmlChar*) "property-set") == 0) {
         // loop over all children that are property nodes
         for (xmlNode *property = xmlFirstElementChild(node);
                 property != NULL && !res;
                 property = xmlNextElementSibling(property)) {
-            res = parse_xml(property, transitions,  isAll,  model);
+            res = parse_xml(property, transitions,  isAll, model, relation);
         }
     // parse property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "property") == 0) {
         warn("parsing property");
-        res = parse_xml(xmlFirstElementChild(node), transitions,  isAll,  model);
+        res = parse_xml(xmlFirstElementChild(node), transitions,  isAll, model, relation);
     // parse id of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "id") == 0) {
         warn("Property id is: %s", xmlNodeGetContent(node));
-        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll,  model);
+        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, model, relation);
     // parse description of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "description") == 0) {
         warn("Property description is: %s", xmlNodeGetContent(node));
-        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll,  model);
+        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, model, relation);
     // parse the formula
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
         warn("Parsing formula...");
         parse_formula(xmlFirstElementChild(node));
-        parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll,  model);
+        parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, model, relation);
         res = 0;
         printf("\n");
     // node not recognized
@@ -448,7 +448,7 @@ parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD model)
  * \returns 0 on success, 1 on failure.
  */
 static int
-load_xml(const char* name, map_t *transitions, int isAll, BDD model)
+load_xml(const char* name, map_t *transitions, int isAll, BDD model, BDD relation)
 {
     LACE_ME;
     int res;
@@ -459,7 +459,7 @@ load_xml(const char* name, map_t *transitions, int isAll, BDD model)
     if (doc == NULL) res = 1;
     else {
         xmlNode *node = xmlDocGetRootElement(doc);
-        res = parse_xml(node, transitions, isAll, model);
+        res = parse_xml(node, transitions, isAll, model, relation);
     }
 
     return res;
@@ -483,7 +483,7 @@ int main(int argc, char** argv)
             warn("Successful parse of file '%s' :)", name);
             if (argc == 3) {
                 const char *formulas = argv[2];
-                res = load_xml(formulas, andl_context.transitions, 0, sylvan_true);
+                res = load_xml(formulas, andl_context.transitions, 0, sylvan_true, sylvan_true);
                 if (res) warn("Unable to load xml '%s'", formulas);
             }
             init_sylvan();
