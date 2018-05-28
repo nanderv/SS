@@ -64,14 +64,15 @@ BDD petri_fireable_transition (andl_context_t *andl_context, char name) {
 
 int get_marking_fn (BDD* bdd, places_struct_t* i) {
   LACE_ME;
-  BDDVAR var;
+  BDD var;
+  sylvan_protect(&var);
   if(i->marking==1) {
      var = sylvan_ithvar(i->bddvar);
      sylvan_protect(&var);    
   }
   else {
-    var = sylvan_nithvar(i->bddvar);
-    sylvan_protect(&var);
+    var = sylvan_ithvar(i->bddvar);
+    var = sylvan_not(var);
   }
   *bdd = sylvan_and(*bdd, var);
 
