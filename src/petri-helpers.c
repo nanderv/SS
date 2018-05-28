@@ -44,14 +44,8 @@ BDD petri_fireable_transition (andl_context_t *andl_context, char name) {
   transition = malloc(sizeof(transitions_struct_t));
   hashmap_get(andl_context->transitions, name, (void**)(&transition));
 
-  //int in_arcs[transition->num_in_arcs];
-  //int out_arcs[transition->num_out_arcs];
+  /* We assume sorted arcs! Sort the arcs before running this function */
 
-
-  qsort(transition->in_arcs, transition->num_in_arcs, sizeof(int), compare_arcs_fn);
-  qsort(transition->out_arcs, transition->num_out_arcs, sizeof(int), compare_arcs_fn);
-  // sort in and out arcs
-  // do some qsort
   int n = 0;
   int m = 0;
 
