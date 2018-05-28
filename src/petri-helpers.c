@@ -9,10 +9,20 @@ BDD transition_in_arcs()
   return sylvan_false;
   }
 */
-void andl_context_init_keys (andl_context_t *andl_context) {
+int compare_arcs_fn (const void * a, const void * b) {
+  return ( *(int*)a - *(int*)b );
+}
 
-  
+int petri_sort_arcs_fn(char* item, transitions_struct_t* transition) {
+  qsort(transition->in_arcs, transition->num_in_arcs, sizeof(int), compare_arcs_fn);
+  qsort(transition->out_arcs, transition->num_out_arcs, sizeof(int), compare_arcs_fn);
+  return MAP_OK;
+}
 
+void petri_sort_arcs (map_t transitions) {
+  void* item;
+  item = malloc(sizeof(void));
+  hashmap_iterate(transitions, *petri_sort_arcs_fn, (void**)(&item));
 }
 
 int place_key_lookup () {
@@ -34,20 +44,24 @@ BDD petri_fireable_transition (andl_context_t *andl_context, char name) {
   transition = malloc(sizeof(transitions_struct_t));
   hashmap_get(andl_context->transitions, name, (void**)(&transition));
 
-  int in_arcs[transition->num_in_arcs];
-  int out_arcs[transition->num_out_arcs];
+  //int in_arcs[transition->num_in_arcs];
+  //int out_arcs[transition->num_out_arcs];
+
+
+  qsort(transition->in_arcs, transition->num_in_arcs, sizeof(int), compare_arcs_fn);
+  qsort(transition->out_arcs, transition->num_out_arcs, sizeof(int), compare_arcs_fn);
   // sort in and out arcs
   // do some qsort
   int n = 0;
   int m = 0;
 
   for(int i = 0; i < andl_context->num_places; i++) {
-    if( in_arcs[n] == i ) {
+    if( transition->in_arcs[n] == i ) {
       // i is an in arc of the transition
       // so i should be marked currently
       n++;
     }
-    else if( out_arcs[m] == i ) {
+    else if( transition->out_arcs[m] == i ) {
       // i is an out arc of the transition
       // so i-prime should not be unmarked
       m++;
@@ -79,7 +93,6 @@ int get_marking_fn (BDD* bdd, places_struct_t* i) {
   sylvan_unprotect(&var);
   return MAP_OK;
 }
-
 
 BDD petri_get_marking (map_t places) {
   BDD marking = sylvan_true;
@@ -144,5 +157,4 @@ void petri_list_transitions(map_t transitions) {
   void* item;
   item = malloc(sizeof(void));
   hashmap_iterate(transitions, *petri_list_transitions_fn, (void**)(&item));
-
 }

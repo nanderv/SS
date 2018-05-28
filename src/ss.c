@@ -54,6 +54,7 @@ load_andl(andl_context_t *andl_context, const char *name)
         fclose(f);
         res = andl_context->error || pres;
 
+        petri_sort_arcs(andl_context->transitions);
         petri_list_places(andl_context->places);
         petri_list_transitions(andl_context->transitions);
 

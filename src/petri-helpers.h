@@ -2,8 +2,7 @@
 #include <hashmap.h> 
 
 /* */
-void andl_context_init_keys (andl_context_t *andl_context);
-
+void petri_sort_arcs (map_t transitions);
 
 /* Returns a BDD array of transitions. Each transition
    represents the fireability of a petrinet transition.
