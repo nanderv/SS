@@ -249,19 +249,42 @@ parse_formula(xmlNode *node)
 * CTL CHECKERS
 */
 
+// TODO: Prev function
+BDD MYprev(BDD in, BDD model){
+    LACE_ME;
+
+    return in;
+}
+
+
+
 BDD checkEU(BDD left, BDD right, BDD model)
 {
-    return sylvan_true;
+    LACE_ME;
+    BDD z = right;
+    BDD old = sylvan_false;
+    while ( z != old) {
+        old = z;
+        z = sylvan_or(z, sylvan_and(left, MYprev(z, model)));
+    }
+    return z;
 }
 
 BDD checkEG(BDD left, BDD model)
 {
-    return sylvan_true;
-}
+    LACE_ME;
+    BDD z = left;
+    BDD old = sylvan_false;
+    while ( z != old) {
+        old = z;
+        z = sylvan_and(z, MYprev(z, model));
+    }
+    return z;}
 
 BDD checkEX(BDD left, BDD model)
 {
-    return sylvan_true;
+    LACE_ME;
+    return MYprev(left, model);
 }
 
 BDD checkEF(BDD left, BDD model){
@@ -275,10 +298,12 @@ BDD checkEF(BDD left, BDD model){
 BDD
 parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD model)
 {
-      warn("HERE");
+    LACE_ME;
 
-LACE_ME;
-return sylvan_true;
+    return sylvan_true;
+
+    warn("HERE");
+
 
     // first check if the node is not a NULL pointer.
     if (node == NULL) {       
