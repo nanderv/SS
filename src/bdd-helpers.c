@@ -1,8 +1,7 @@
 #include <string.h>
 #include <sylvan.h>
 
-BDD
-rel_prod(BDD states, BDD relation, BDD x, BDDMAP map) {
+BDD rel_prod(BDD states, BDD relation, BDD x, BDDMAP map) {
   LACE_ME;
   /*
   MTBDDMAP map = sylvan_map_empty();

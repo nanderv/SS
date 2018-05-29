@@ -106,6 +106,7 @@ deinit_sylvan()
 void
 do_ss_things(andl_context_t *andl_context,int argc, char** argv)
 {
+    LACE_ME;
     warn("The name of the Petri net is: %s", andl_context->name);
     warn("There are %d transitions", andl_context->num_transitions);
     warn("There are %d places", andl_context->num_places);
@@ -122,11 +123,23 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     BDD initial_marking = petri_get_marking(andl_context->places);
     sylvan_protect(&initial_marking);
 
-    export_bdd(initial_marking, 0);
+
 
     BDD transitions[andl_context->num_transitions];
 
-    petri_fireable_transition(andl_context->transitions, "FF1b_5", andl_context->num_places);
+    // "FF2a_1"
+    //  "FF1a_2"
+    BDD trans = petri_fireable_transition(andl_context->transitions, "FF1a_2", andl_context->num_places);
+
+
+    for(int i = 0; i < andl_context->num_places; i=i+2) {
+      BDDVAR elem = i;
+      set = sylvan_set_add(set, elem);
+    }
+    BDD result = rel_prod(initial_marking, trans, set, map);
+    
+    export_bdd(result, 0);
+
     
     for(int i = 0; i < andl_context->num_transitions; i++) {
       char key[512];

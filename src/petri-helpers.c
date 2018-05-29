@@ -38,7 +38,7 @@ int transition_key_lookup () {
 
 BDD petri_fireable_transition (map_t transitions, char* name, int num_variables) {
   LACE_ME;
-  BDD bdd = sylvan_false;
+  BDD bdd = sylvan_true;
   sylvan_protect(&bdd);
   
   transitions_struct_t* transition;
@@ -50,8 +50,8 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
 
   int n = 0;
   int m = 0;
-
-  for(int i = 0; i < num_variables; i++) {
+  
+  for(int i = 0; i < num_variables; i=i+2) { //i=i+2: only go over non-prime vars.
     if( transition->in_arcs[n] == i ) {
       BDD x_i = sylvan_ithvar(i);
       BDD x_i_prime = sylvan_nithvar(i+1);
