@@ -8,6 +8,7 @@ ss_SOURCES += andl-lexer.l andl-parser.y
 ss_SOURCES += hashmap.h hashmap.c
 ss_SOURCES += petri-helpers.c petri-helpers.h
 ss_SOURCES += bdd-helpers.c bdd-helpers.h
+ss_SOURCES += checkers.c checkers.h
 
 ss_YFLAGS = -d
 ss_CFLAGS = $(SYLVAN_CFLAGS) $(XML_CFLAGS)

@@ -15,7 +15,7 @@
 
 #include <petri-helpers.h>
 #include <bdd-helpers.h>
-
+#include <checkers.h>
 /**
  * Load the andl file in \p name.
  * \p andl_context: The user context available when paring the andl file.
@@ -159,7 +159,6 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
         if (res) warn("Unable to load xml '%s'", formulas);
     }
 
-    
     // do stuff
     sylvan_unprotect(&bdd);
     sylvan_unprotect(&set);
@@ -251,53 +250,6 @@ parse_formula(xmlNode *node)
     }
     return res;
 }
-
-/**
-* CTL CHECKERS
-*/
-
-// TODO: Prev function
-BDD MYprev(BDD in, BDD startState, BDD relation){
-    LACE_ME;
-
-    return in;
-}
-
-
-
-BDD checkEU(BDD left, BDD right, BDD startState, BDD relation)
-{
-    LACE_ME;
-    BDD z = right;
-    BDD old = sylvan_false;
-    while ( z != old) {
-        old = z;
-        z = sylvan_or(z, sylvan_and(left, MYprev(z, startState, relation)));
-    }
-    return z;
-}
-
-BDD checkEG(BDD left, BDD startState, BDD relation)
-{
-    LACE_ME;
-    BDD z = left;
-    BDD old = sylvan_false;
-    while ( z != old) {
-        old = z;
-        z = sylvan_and(z, MYprev(z, startState, relation));
-    }
-    return z;}
-
-BDD checkEX(BDD left, BDD startState, BDD relation)
-{
-    LACE_ME;
-    return MYprev(left, startState, relation);
-}
-
-BDD checkEF(BDD left, BDD startState, BDD relation){
- return checkEU(sylvan_true, left, startState, relation);
-}
-
 
 /**
 * Recursive descent for formula parsing, thus validating the formula.
