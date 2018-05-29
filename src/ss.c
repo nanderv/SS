@@ -104,7 +104,7 @@ deinit_sylvan()
  * statistics of the parsed Petri net.
  */
 void
-do_ss_things(andl_context_t *andl_context)
+do_ss_things(andl_context_t *andl_context,int argc, char** argv)
 {
     warn("The name of the Petri net is: %s", andl_context->name);
     warn("There are %d transitions", andl_context->num_transitions);
@@ -135,9 +135,7 @@ do_ss_things(andl_context_t *andl_context)
     }
     //    hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
 
-
-
-    
+   
     //    printf("transitions=%i\n", transitions);
     
     // build the map used for substitions in the sylvan_compose function
@@ -150,7 +148,14 @@ do_ss_things(andl_context_t *andl_context)
     
     //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
     //  item = malloc(sizeof(places_struct_t));
+    const char *name = argv[1];
 
+    warn("Successful parse of file '%s' :)", name);
+    if (argc == 3) {
+        const char *formulas = argv[2]; // sylvan_true's: initial state, relation
+        int res = load_xml(formulas, andl_context->transitions, 0, sylvan_true, sylvan_true);
+        if (res) warn("Unable to load xml '%s'", formulas);
+    }
 
     
     // do stuff
@@ -299,7 +304,7 @@ BDD
 parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD startState, BDD relation)
 {
     LACE_ME;
-
+    warn("HERE");
     // first check if the node is not a NULL pointer.
     if (node == NULL) {       
         warn("Invalid XML");
@@ -442,7 +447,7 @@ parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD startState, BDD rela
  *
  * \returns 0 on success, 1 on failure.
  */
-static int
+int
 load_xml(const char* name, map_t *transitions, int isAll, BDD startState, BDD relation)
 {
     LACE_ME;
@@ -475,15 +480,10 @@ int main(int argc, char** argv)
         res = load_andl(&andl_context, name);
         if (res) warn("Unable to parse file '%s'", name);
         else {
-            warn("Successful parse of file '%s' :)", name);
-            if (argc == 3) {
-                const char *formulas = argv[2];
-                res = load_xml(formulas, andl_context.transitions, 0, sylvan_true, sylvan_true);
-                if (res) warn("Unable to load xml '%s'", formulas);
-            }
             init_sylvan();
+
             // execute the main body of code
-            do_ss_things(&andl_context);
+            do_ss_things(&andl_context, argc, argv);
             deinit_sylvan();
         }
     } else {
