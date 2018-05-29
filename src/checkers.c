@@ -3,15 +3,20 @@
 // TODO: Prev function
 BDD MYprev(BDD in, BDD relations[], int n_relations, BDD x, BDDMAP map) {
     LACE_ME;
+    sylvan_protect(&in);
     BDD result = sylvan_false;
+    sylvan_protect(&result);
     for(int i=0; i < n_relations; i++) {
         BDD relation = relations[i];
         // execute relation check; simply try running relations in reverse.
 
         BDD relation_result  =  sylvan_relprev(relation, in, x);
-
+        sylvan_protect(&relation_result);
         result = sylvan_or(result, relation_result);
+        sylvan_unprotect(&relation_result);
     }
+    sylvan_unprotect(&result);
+    sylvan_unprotect(&in);
     return result;
 }
 

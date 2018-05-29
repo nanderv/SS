@@ -81,7 +81,7 @@ init_sylvan()
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
-    sylvan_gc_disable();
+    //sylvan_gc_disable();
 }
 
 /**
@@ -130,6 +130,8 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     
     for(int i = 0; i<andl_context->num_transitions; i++){
       transitions[i] = petri_fireable_transition(andl_context->transitions, andl_context->transition_names[i], andl_context->num_places);
+      sylvan_protect(&transitions[i]);
+
     }
 
 
@@ -182,14 +184,13 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
     //  item = malloc(sizeof(places_struct_t));
     const char *name = argv[1];
-    /*
+    
     warn("Successful parse of file '%s' :)", name);
     if (argc == 3) {
         const char *formulas = argv[2]; // sylvan_true's: initial state, relations
-        BDD relations[0] =  {};
-        int res = load_xml(formulas, andl_context->transitions, 0, relations, 0, sylvan_true);
+        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set);
         if (res) warn("Unable to load xml '%s'", formulas);
-        }*/
+        }
 
     // do stuff
     sylvan_unprotect(&bdd);
@@ -327,7 +328,10 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
     } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
         BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
         BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
-        return checkEU(res, res2, relations, n_relations,  x, map );
+
+        BDD r = checkEU(res, res2, relations, n_relations,  x, map );
+
+        return r;
     // parse before
     } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
         return parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
@@ -341,26 +345,44 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
     // parse conjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
         BDD res = parse_formula_BU(xmlFirstElementChild(node),andl_context,0, relations, n_relations,  x, map );
+        sylvan_protect(&res);
         BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
-        return sylvan_and(res, res2);
+        sylvan_protect(&res2);
+        BDD fin =  sylvan_and(res, res2);
+        sylvan_unprotect(&res);
+        sylvan_unprotect(&res2);
+        return fin;
     // parse disjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "disjunction") == 0) {
         BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
+        sylvan_protect(&res);
+        
         BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
-        return sylvan_or(res, res2);
+        sylvan_protect(&res2);
+
+        BDD fin =  sylvan_or(res, res2);
+        sylvan_unprotect(&res);
+        sylvan_unprotect(&res2);
+        return fin;
     // parse is-fireable: atomic predicate!
     } else if (xmlStrcmp(node->name, (const xmlChar*) "is-fireable") == 0) {
         return parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
     // parse transition (part of the atomic predicate)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
         BDD res = sylvan_false;
+        sylvan_protect(&res );
+
         for (xmlNode *transition = node; transition != NULL;
                 transition = xmlNextElementSibling(transition)) {
             warn(xmlNodeGetContent(transition));
+
             BDD intermediate = petri_fireable_transition (andl_context->transitions, xmlNodeGetContent(transition), andl_context->num_places);
+                    sylvan_protect(&intermediate);
             res = sylvan_or(res, intermediate);
+            sylvan_unprotect(&intermediate);
             fprintf(stderr, "%s,", xmlNodeGetContent(transition));
         }
+        sylvan_unprotect(&res);
         return res;
     } else {
         warn("Invalid xml node '%s'", node->name);
@@ -407,7 +429,12 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
         warn("Parsing formula...");
         parse_formula(xmlFirstElementChild(node));
-        parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
+        BDD ans = parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
+        //export_bdd(ans, 9128);
+        printf("\n\n NUMS: %i : %i\n", ans, sylvan_false);
+
+       // int satcount = sylvan_satcount(ans, x);
+        //printf("satcount: %i\n", satcount);
         res = 0;
         printf("\n");
     // node not recognized
