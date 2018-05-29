@@ -123,22 +123,39 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     BDD initial_marking = petri_get_marking(andl_context->places);
     sylvan_protect(&initial_marking);
 
-
-
+    /*    char names[andl_context->num_places][512];
+          names = petri_transition_names(andl_context->transitions, andl_context->num_places);*/
     BDD transitions[andl_context->num_transitions];
-
-    // "FF2a_1"
-    //  "FF1a_2"
-    BDD trans = petri_fireable_transition(andl_context->transitions, "FF1a_2", andl_context->num_places);
+    
+    for(int i = 0; i<andl_context->num_transitions; i++){
+      transitions[i] = petri_fireable_transition(andl_context->transitions, andl_context->transition_names[i], andl_context->num_places);
+    }
 
 
     for(int i = 0; i < andl_context->num_places; i=i+2) {
       BDDVAR elem = i;
       set = sylvan_set_add(set, elem);
     }
-    BDD result = rel_prod(initial_marking, trans, set, map);
+
+
+    BDD v_prev = sylvan_false;
+    BDD v = initial_marking;
     
-    export_bdd(result, 0);
+    while (v_prev != v){
+      v_prev = v;
+      for(int i=0; i<andl_context->num_transitions; i++) {
+        BDD r_i = transitions[i];
+        //        BDD next_state = rel_prod(v, r_i, set, map);
+        BDD next_state = sylvan_relnext(v, r_i, set);
+        v = sylvan_or(v, next_state);
+        export_bdd(v, i);
+        printf("%i\t\%i\t%i\n", v, v_prev, v_prev!=v);
+
+      }
+    }
+
+    int satcount = sylvan_satcount(v, andl_context->num_places);
+    printf("satcount: %i\n", satcount);
 
     
     for(int i = 0; i < andl_context->num_transitions; i++) {

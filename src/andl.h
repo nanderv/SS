@@ -44,6 +44,8 @@ typedef struct {
     // whether an error has occured during parsing
     int error;
 
+    char transition_names[512][512];
+
     map_t transitions;
     map_t places;
     map_t in_arcs;

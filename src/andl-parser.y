@@ -159,6 +159,7 @@ tdec
             transition->num_out_arcs = 0;
             snprintf(transition->transition_name, 512, "%s", andl_context->current_trans);
             transition->number = andl_context->num_transitions - 1;
+            snprintf(andl_context->transition_names[andl_context->num_transitions - 1], 512, "%s", andl_context->current_trans);
 
             hashmap_put(andl_context->transitions, transition->transition_name, transition);
 

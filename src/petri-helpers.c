@@ -29,11 +29,20 @@ int place_key_lookup () {
   
   return MAP_OK;
 }
-
-int transition_key_lookup () {
-  
+/*
+int transition_key_lookup(char* item[], transitions_struct_t* t)
+  strcpy(item[t->number], t->transition_name);
   return MAP_OK;
 }
+
+void petri_set_transition_names (andl_context_t *andl_context) {
+  char names[n][512];
+  names = malloc(n*512*sizeof(char));
+
+  hashmap_iterate(transitions, *transition_key_lookup, (void**)(&names));
+  return names;
+}
+*/
 
 
 BDD petri_fireable_transition (map_t transitions, char* name, int num_variables) {

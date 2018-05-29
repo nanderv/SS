@@ -10,7 +10,7 @@ void petri_sort_arcs (map_t transitions);
    Pass an andl_context with key
 */
 
-
+void petri_transition_names (map_t transitions, int n);
 BDD petri_get_transitions (andl_context_t *andl_context);
 
 /* Constructs a BDD that expresses the firability of some petri transition with
