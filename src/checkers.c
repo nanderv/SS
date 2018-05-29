@@ -39,3 +39,14 @@ BDD checkEX(BDD left, BDD startState, BDD relation)
 BDD checkEF(BDD left, BDD startState, BDD relation){
  return checkEU(sylvan_true, left, startState, relation);
 }
+
+BDD checkAF(BDD left, BDD startState, BDD relation){
+    BDD im1 = sylvan_not(left);
+    im1 = checkEG(im1, startState, relation);
+    return sylvan_not(im1);
+}
+BDD checkAG(BDD left, BDD startState, BDD relation){
+    BDD im1 = sylvan_not(left);
+    im1 = checkEF(im1, startState, relation);
+    return sylvan_not(im1);
+}

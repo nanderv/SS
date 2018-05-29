@@ -8,3 +8,5 @@ BDD checkEX(BDD left, BDD startState, BDD relation);
 
 // Converters
 BDD checkEF(BDD left, BDD startState, BDD relation);
+BDD checkAF(BDD left, BDD startState, BDD relation);
+BDD checkAG(BDD left, BDD startState, BDD relation);

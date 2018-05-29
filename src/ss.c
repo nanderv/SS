@@ -255,7 +255,7 @@ parse_formula(xmlNode *node)
 * Recursive descent for formula parsing, thus validating the formula.
 */
 BDD
-parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD startState, BDD relation)
+parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD startState, BDD relation)
 {
     LACE_ME;
     warn("HERE");
@@ -263,78 +263,69 @@ parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD startState, B
     if (node == NULL) {       
         warn("Invalid XML");
     // only parse xml nodes, skip other parts of the XML file.
-    } else if (node->type != XML_ELEMENT_NODE) return parse_formula_BU(xmlNextElementSibling(node), transitions,0, startState, relation);
+    } else if (node->type != XML_ELEMENT_NODE) return parse_formula_BU(xmlNextElementSibling(node), andl_context,0, startState, relation);
     // parse forAll
     else if (xmlStrcmp(node->name, (const xmlChar*) "all-paths") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions, 1, startState, relation);
+        return parse_formula_BU(xmlFirstElementChild(node), andl_context, 1, startState, relation);
     // parse Exists
     } else if (xmlStrcmp(node->name, (const xmlChar*) "exists-path") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions, 0, startState, relation);
+        return parse_formula_BU(xmlFirstElementChild(node), andl_context, 0, startState, relation);
     // parse Globally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "globally") == 0) {
         if (!isAll) // EG
         {
-            return checkEG(parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation), startState, relation);
+            return checkEG(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation), startState, relation);
         } else { // AG
-            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation));
-            im1 = checkEF(im1, startState, relation);
-            return sylvan_not(im1);
+            return checkAG(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation), startState, relation);
+
         }
     // parse Finally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "finally") == 0) {
         if (!isAll) // EF
         {
-            return checkEF(parse_formula_BU(xmlFirstElementChild(node), transitions, 0, startState, relation), startState, relation);
+            return checkEF(parse_formula_BU(xmlFirstElementChild(node), andl_context, 0, startState, relation), startState, relation);
         } else { // AF
-            BDD im1 = sylvan_not(parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation));
-            im1 = checkEG(im1, startState, relation);
-            return sylvan_not(im1);
+            return checkAF(parse_formula_BU(xmlFirstElementChild(node), andl_context, 0, startState, relation), startState, relation);
+
         }
     // parse neXt
     } else if (xmlStrcmp(node->name, (const xmlChar*) "next") == 0) {
-        return checkEX(parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation), startState, relation);
+        return checkEX(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation), startState, relation);
     // parse Until
     } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, startState, relation);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, startState, relation);
         return checkEU(res, res2, startState, relation);
     // parse before
     } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation);
+        return parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation);
     // parse reach
     } else if (xmlStrcmp(node->name, (const xmlChar*) "reach") == 0) {
-        return  parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation);
+        return  parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation);
     // parse negation
     } else if (xmlStrcmp(node->name, (const xmlChar*) "negation") == 0) {
-        return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation));
+        return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation));
         fprintf(stderr, ")");
     // parse conjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node),transitions,0, startState, relation);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, startState, relation);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node),andl_context,0, startState, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, startState, relation);
         return sylvan_and(res, res2);
     // parse disjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "disjunction") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation);
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), transitions,0, startState, relation);
+        BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation);
+        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, startState, relation);
         return sylvan_or(res, res2);
     // parse is-fireable: atomic predicate!
     } else if (xmlStrcmp(node->name, (const xmlChar*) "is-fireable") == 0) {
-        return parse_formula_BU(xmlFirstElementChild(node), transitions,0, startState, relation);
+        return parse_formula_BU(xmlFirstElementChild(node), andl_context,0, startState, relation);
     // parse transition (part of the atomic predicate)
     } else if (xmlStrcmp(node->name, (const xmlChar*) "transition") == 0) {
         BDD res = sylvan_false;
         for (xmlNode *transition = node; transition != NULL;
                 transition = xmlNextElementSibling(transition)) {
-            transitions_struct_t transitionD;
-            hashmap_get(transitions, xmlNodeGetContent(transition), (void**) (&transitionD));
-            BDD intermediate = startState;
-            for (int i=0;i<transitionD.num_in_arcs; i++) {
-                intermediate = sylvan_and(intermediate, sylvan_ithvar(transitionD.in_arcs[i]));
-            }
-            for (int i=0;i<transitionD.num_out_arcs; i++) {
-                intermediate = sylvan_and(intermediate, sylvan_nithvar(transitionD.out_arcs[i]));
-            }
+            warn(xmlNodeGetContent(transition));
+            BDD intermediate = petri_fireable_transition (andl_context->transitions, xmlNodeGetContent(transition), andl_context->num_places);
             res = sylvan_or(res, intermediate);
             fprintf(stderr, "%s,", xmlNodeGetContent(transition));
         }
@@ -350,7 +341,7 @@ parse_formula_BU(xmlNode *node, map_t *transitions, int isAll, BDD startState, B
  * \brief recursively parse the given XML node.
  */
 static int
-parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD startState, BDD relation)
+parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD startState, BDD relation)
 {
     LACE_ME;
     int res = 0;
@@ -402,7 +393,7 @@ parse_xml(xmlNode *node, map_t *transitions, int isAll, BDD startState, BDD rela
  * \returns 0 on success, 1 on failure.
  */
 int
-load_xml(const char* name, map_t *transitions, int isAll, BDD startState, BDD relation)
+load_xml(const char* name, andl_context_t *transitions, int isAll, BDD startState, BDD relation)
 {
     LACE_ME;
     int res;
