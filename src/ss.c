@@ -72,7 +72,7 @@ void
 init_sylvan()
 {
     int n_workers = 0; // auto-detect
-    lace_init(n_workers, 0);
+    lace_init(n_workers, 40960000);
     lace_startup(0, NULL, NULL);
 
     /* initialize the node table and cache with minimum size 2^20 entries, and
@@ -126,6 +126,8 @@ do_ss_things(andl_context_t *andl_context)
 
     BDD transitions[andl_context->num_transitions];
 
+    petri_fireable_transition(andl_context->transitions, "FF1b_5", andl_context->num_places);
+    
     for(int i = 0; i < andl_context->num_transitions; i++) {
       char key[512];
       transitions_struct_t* value = malloc(sizeof(transitions_struct_t));

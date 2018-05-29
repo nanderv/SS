@@ -13,8 +13,16 @@ void petri_sort_arcs (map_t transitions);
 
 BDD petri_get_transitions (andl_context_t *andl_context);
 
+/* Constructs a BDD that expresses the firability of some petri transition with
+   a certain name. 
+   Precondition for a fireable transition: all in-arcs are marked, no out-arcs is marked.
+   Postcondition for a fireable transition: no in-arcs are marked, all out-arcs are marked. All nodes without an arc in this transition should have equal marking after the transition.
 
-BDD petri_fireable_transition (map_t transitions, char name);
+   @param transitions: hashmap containing transtions with in and out arcs
+   @param name: name of the key in the transtion hashmap
+   @param num_variables: number of variables in the bdd. 
+ */
+BDD petri_fireable_transition (map_t transitions, char* name, int num_variables);
 
 BDD petri_get_marking (map_t places);
 

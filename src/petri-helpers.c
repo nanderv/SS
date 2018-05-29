@@ -36,36 +36,50 @@ int transition_key_lookup () {
 }
 
 
-BDD petri_fireable_transition (andl_context_t *andl_context, char name) {
+BDD petri_fireable_transition (map_t transitions, char* name, int num_variables) {
+  LACE_ME;
   BDD bdd = sylvan_false;
   sylvan_protect(&bdd);
-
+  
   transitions_struct_t* transition;
   transition = malloc(sizeof(transitions_struct_t));
-  hashmap_get(andl_context->transitions, name, (void**)(&transition));
 
+  
+  int error = hashmap_get(transitions, name, (void**)(&transition));
   /* We assume sorted arcs! Sort the arcs before running this function */
 
   int n = 0;
   int m = 0;
 
-  for(int i = 0; i < andl_context->num_places; i++) {
+  for(int i = 0; i < num_variables; i++) {
     if( transition->in_arcs[n] == i ) {
+      BDD x_i = sylvan_ithvar(i);
+      BDD x_i_prime = sylvan_nithvar(i+1);
+      bdd = sylvan_and(bdd, x_i);
+      bdd = sylvan_and(bdd, x_i_prime);
       // i is an in arc of the transition
       // so i should be marked currently
+      // and it's prime variable should not be marked
       n++;
     }
     else if( transition->out_arcs[m] == i ) {
+      BDD x_i = sylvan_nithvar(i);
+      BDD x_i_prime = sylvan_ithvar(i+1);
+      bdd = sylvan_and(bdd, x_i);
+      bdd = sylvan_and(bdd, x_i_prime);
       // i is an out arc of the transition
-      // so i-prime should not be unmarked
+      // so i-prime should e marked
       m++;
     }
     else {
+      BDD x_i = sylvan_ithvar(i);
+      BDD x_i_prime = sylvan_ithvar(i+1);
+      bdd = sylvan_and(bdd, sylvan_equiv(x_i, x_i_prime));
     // i is not an arc in the transition
     // so i-prime should equal i
     }
   }
-  
+
   sylvan_unprotect(&bdd);
   return bdd;
 }
