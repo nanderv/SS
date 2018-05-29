@@ -60,10 +60,11 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
   int n = 0;
   int m = 0;
   
-  for(int i = 0; i < num_variables; i=i+2) { //i=i+2: only go over non-prime vars.
-    if( transition->in_arcs[n] == i ) {
-      BDD x_i = sylvan_ithvar(i);
-      BDD x_i_prime = sylvan_nithvar(i+1);
+  for(int i = 0; i < num_variables; i++) { //i=i+2: only go over non-prime vars.
+    int p = i*2;
+    if( transition->in_arcs[n] == p ) {
+      BDD x_i = sylvan_ithvar(p);
+      BDD x_i_prime = sylvan_nithvar(p+1);
       bdd = sylvan_and(bdd, x_i);
       bdd = sylvan_and(bdd, x_i_prime);
       // i is an in arc of the transition
@@ -71,9 +72,9 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
       // and it's prime variable should not be marked
       n++;
     }
-    else if( transition->out_arcs[m] == i ) {
-      BDD x_i = sylvan_nithvar(i);
-      BDD x_i_prime = sylvan_ithvar(i+1);
+    else if( transition->out_arcs[m] == p ) {
+      BDD x_i = sylvan_nithvar(p);
+      BDD x_i_prime = sylvan_ithvar(p+1);
       bdd = sylvan_and(bdd, x_i);
       bdd = sylvan_and(bdd, x_i_prime);
       // i is an out arc of the transition
@@ -81,8 +82,8 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
       m++;
     }
     else {
-      BDD x_i = sylvan_ithvar(i);
-      BDD x_i_prime = sylvan_ithvar(i+1);
+      BDD x_i = sylvan_ithvar(p);
+      BDD x_i_prime = sylvan_ithvar(p+1);
       bdd = sylvan_and(bdd, sylvan_equiv(x_i, x_i_prime));
     // i is not an arc in the transition
     // so i-prime should equal i

@@ -81,6 +81,7 @@ init_sylvan()
 
     // initialize Sylvan's BDD sub system
     sylvan_init_bdd();
+    sylvan_gc_disable();
 }
 
 /**
@@ -132,8 +133,8 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     }
 
 
-    for(int i = 0; i < andl_context->num_places; i=i+2) {
-      BDDVAR elem = i;
+    for(int i = 0; i < andl_context->num_places; i++) {
+      BDDVAR elem = i*2;
       set = sylvan_set_add(set, elem);
     }
 
@@ -154,7 +155,7 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
       }
     }
 
-    int satcount = sylvan_satcount(v, andl_context->num_places);
+    int satcount = sylvan_satcount(v, set);
     printf("satcount: %i\n", satcount);
 
     
@@ -181,14 +182,14 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
     //  item = malloc(sizeof(places_struct_t));
     const char *name = argv[1];
-
+    /*
     warn("Successful parse of file '%s' :)", name);
     if (argc == 3) {
         const char *formulas = argv[2]; // sylvan_true's: initial state, relations
         BDD relations[0] =  {};
         int res = load_xml(formulas, andl_context->transitions, 0, relations, 0, sylvan_true);
         if (res) warn("Unable to load xml '%s'", formulas);
-    }
+        }*/
 
     // do stuff
     sylvan_unprotect(&bdd);
