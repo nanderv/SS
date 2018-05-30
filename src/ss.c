@@ -55,9 +55,6 @@ load_andl(andl_context_t *andl_context, const char *name)
         res = andl_context->error || pres;
 
         petri_sort_arcs(andl_context->transitions);
-        petri_list_places(andl_context->places);
-        petri_list_transitions(andl_context->transitions);
-
     }
 
     return res;
@@ -114,75 +111,35 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     warn("There are %d in arcs", andl_context->num_in_arcs);
     warn("There are %d out arcs", andl_context->num_out_arcs);
 
-    BDD bdd = sylvan_true;
-    sylvan_protect(&bdd);
-    BDDSET set = sylvan_set_empty();
-    sylvan_protect(&set);
-    BDDMAP map = sylvan_map_empty();
-    sylvan_protect(&map);
-
+    // get the initial marking of the petri as a bdd
     BDD initial_marking = petri_get_marking(andl_context->places);
     sylvan_protect(&initial_marking);
 
-    /*    char names[andl_context->num_places][512];
-          names = petri_transition_names(andl_context->transitions, andl_context->num_places);*/
+    // create an array of transition BDDs
+    // these transitions express the firability condition of a petri-transition
     BDD transitions[andl_context->num_transitions];
-    
     for(int i = 0; i<andl_context->num_transitions; i++){
       transitions[i] = petri_fireable_transition(andl_context->transitions, andl_context->transition_names[i], andl_context->num_places);
       sylvan_protect(&transitions[i]);
-
     }
-
-
+    
+    // initialize a set of non-prime variables
+    // this set is used for the sat_count and for reachability
+    BDDSET non_prime_variables = sylvan_set_empty();
+    sylvan_protect(&non_prime_variables);
     for(int i = 0; i < andl_context->num_places; i++) {
       BDDVAR elem = i*2;
-      set = sylvan_set_add(set, elem);
+      non_prime_variables = sylvan_set_add(non_prime_variables, elem);
     }
 
+    // this finds reachable states (using relnext) for a given initial marking
+    BDD v = reachable_states(initial_marking, non_prime_variables, transitions, andl_context->num_transitions);
 
-    BDD v_prev = sylvan_false;
-    BDD v = initial_marking;
-    
-    while (v_prev != v){
-      v_prev = v;
-      for(int i=0; i<andl_context->num_transitions; i++) {
-        BDD r_i = transitions[i];
-        //        BDD next_state = rel_prod(v, r_i, set, map);
-        BDD next_state = sylvan_relnext(v, r_i, set);
-        v = sylvan_or(v, next_state);
-        export_bdd(v, i);
-        printf("%i\t\%i\t%i\n", v, v_prev, v_prev!=v);
-
-      }
-    }
-
-    int satcount = sylvan_satcount(v, set);
-    printf("satcount: %i\n", satcount);
+    // find and report the satcount
+    int satcount = sylvan_satcount(v, non_prime_variables);
+    warn("satcount: %i\n", satcount);
 
     
-    for(int i = 0; i < andl_context->num_transitions; i++) {
-      char key[512];
-      transitions_struct_t* value = malloc(sizeof(transitions_struct_t));
-      //      sprintf(key, 512, "%i", i);
-      //      hashmap_get(andl_context->transitions, key, (void**)(&value));
-      //      sprintf(stdout, 512, "%s\n", value->transition_name);
-    }
-    //    hashmap_iterate(andl_context->places, *get_transitions, (void**)(&transitions));
-
-   
-    //    printf("transitions=%i\n", transitions);
-    
-    // build the map used for substitions in the sylvan_compose function
-    // remember that all prime variables are at i+1
-    for(int i = 0; i < andl_context->num_places; i++) {
-      map = sylvan_map_add(map, i+1, sylvan_ithvar(i));
-    }
-
-    
-    
-    //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
-    //  item = malloc(sizeof(places_struct_t));
     const char *name = argv[1];
         printf("initial222: %i \n",initial_marking);
 
@@ -192,12 +149,11 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
         //const char* name, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
         int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set,  map, initial_marking);
         if (res) warn("Unable to load xml '%s'", formulas);
-        }
+    }
 
-    // do stuff
-    sylvan_unprotect(&bdd);
-    sylvan_unprotect(&set);
-    sylvan_unprotect(&map);
+    // unprotect protected BDD
+    sylvan_unprotect(&initial_marking);
+    sylvan_unprotect(&non_prime_variables);
 }
 
 /**
