@@ -249,6 +249,7 @@ BDD
 parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map) 
 {
     LACE_ME;
+    warn("HERE");
     // first check if the node is not a NULL pointer.
     if (node == NULL) {       
         warn("Invalid XML");
@@ -281,12 +282,42 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
         return checkEX(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map ), relations, n_relations,  x, map );
     // parse Until
     } else if (xmlStrcmp(node->name, (const xmlChar*) "until") == 0) {
-        BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
-        BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
 
-        BDD r = checkEU(res, res2, relations, n_relations,  x, map );
+        if (!isAll) // EU
+        {
+            BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
+            sylvan_protect(&res);
 
-        return r;
+            BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
+            sylvan_protect(&res2);
+
+            BDD r = checkEU(res, res2, relations, n_relations,  x, map );
+            sylvan_unprotect(&res);
+            sylvan_unprotect(&res2);
+            return r;
+        } else { // AU
+            //E[ψU(φ∧ψ)]EG(ψ)
+            BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
+            sylvan_protect(&res);
+            BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
+            sylvan_protect(&res2);
+
+            res = sylvan_not(res);
+            res2 = sylvan_not(res2);
+
+            BDD temp = sylvan_and(res, res2);
+            sylvan_protect(&temp);
+
+            temp = checkEU(res2, temp, relations, n_relations,  x, map );
+            res2 = checkEG(res2, relations, n_relations,  x, map );
+            temp = sylvan_or(res2, temp);
+            
+            sylvan_unprotect(&res);
+            sylvan_unprotect(&res2);
+            sylvan_unprotect(&temp);
+            return temp;
+        }
+
     // parse before
     } else if (xmlStrcmp(node->name, (const xmlChar*) "before") == 0) {
         return parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
@@ -350,6 +381,7 @@ static int
 parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
 {
 
+
     LACE_ME;
     int res = 0;
     // first check if the node is not a NULL pointer.
@@ -380,16 +412,15 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
         res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse the formula
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
-        //warn("Parsing formula...");
+        warn("Parsing formula...");
         //parse_formula(xmlFirstElementChild(node));
         BDD ans = parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
         sylvan_protect(&ans);
-        export_bdd(ans, 91);
         BDD ansz = sylvan_and(ans, initial_marking);
         if (ansz == sylvan_false)
-            printf("F");
+            warn("F");
         else
-            printf("T");
+            warn("T");
         sylvan_protect(&ansz);
         sylvan_unprotect(&ans);
         sylvan_unprotect(&ansz);
