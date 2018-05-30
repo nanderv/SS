@@ -4,6 +4,8 @@
 BDD MYprev(BDD in, BDD relations[], int n_relations, BDD x, BDDMAP map) {
     LACE_ME;
     sylvan_protect(&in);
+    sylvan_protect(&x);
+    sylvan_protect(&map);
     BDD result = sylvan_false;
     sylvan_protect(&result);
     for(int i=0; i < n_relations; i++) {
@@ -16,6 +18,8 @@ BDD MYprev(BDD in, BDD relations[], int n_relations, BDD x, BDDMAP map) {
         sylvan_unprotect(&relation_result);
     }
     sylvan_unprotect(&result);
+      sylvan_unprotect(&x);
+    sylvan_unprotect(&map);
     sylvan_unprotect(&in);
     return result;
 }
@@ -23,12 +27,24 @@ BDD MYprev(BDD in, BDD relations[], int n_relations, BDD x, BDDMAP map) {
 BDD checkEU(BDD left, BDD right, BDD relations[], int n_relations, BDD x, BDDMAP map) 
 {
     LACE_ME;
+
+
     BDD z = right;
+    sylvan_protect(&left);
+    sylvan_protect(&right);
+    sylvan_protect(&z);
+
     BDD old = sylvan_false;
+        sylvan_protect(&old);
+
     while ( z != old) {
         old = z;
         z = sylvan_or(z, sylvan_and(left, MYprev(z, relations, n_relations,  x, map )));
     }
+    sylvan_unprotect(&left);
+    sylvan_unprotect(&right);
+    sylvan_unprotect(&z);
+    sylvan_unprotect(&old);
     return z;
 }
 
@@ -37,10 +53,17 @@ BDD checkEG(BDD left, BDD relations[], int n_relations, BDD x, BDDMAP map)
     LACE_ME;
     BDD z = left;
     BDD old = sylvan_false;
+    sylvan_protect(&left);
+    sylvan_protect(&z);
+    sylvan_protect(&old);
     while ( z != old) {
         old = z;
         z = sylvan_and(z, MYprev(z, relations, n_relations,  x, map ));
     }
+
+    sylvan_unprotect(&left);
+    sylvan_unprotect(&z);
+    sylvan_unprotect(&old);
     return z;
 }
 
@@ -55,13 +78,26 @@ BDD checkEF(BDD left, BDD relations[], int n_relations, BDD x, BDDMAP map) {
 }
 
 BDD checkAF(BDD left, BDD relations[], int n_relations, BDD x, BDDMAP map) {
+    sylvan_protect(&left);
+
     BDD im1 = sylvan_not(left);
+    sylvan_protect(&im1);
+
     im1 = checkEG(im1, relations, n_relations,  x, map );
+    sylvan_unprotect(&im1);
+    sylvan_unprotect(&left);
+
     return sylvan_not(im1);
 }
 
 BDD checkAG(BDD left, BDD relations[], int n_relations, BDD x, BDDMAP map) {
+        sylvan_protect(&left);
+
     BDD im1 = sylvan_not(left);
+        sylvan_protect(&im1);
+
     im1 = checkEF(im1, relations, n_relations,  x, map );
+        sylvan_unprotect(&im1);
+    sylvan_unprotect(&left);
     return sylvan_not(im1);
 }

@@ -184,11 +184,13 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     //        places_struct_t* item; // perhaps this is something that the list_places can use to remember stuff
     //  item = malloc(sizeof(places_struct_t));
     const char *name = argv[1];
-    
+        printf("initial222: %i \n",initial_marking);
+
     warn("Successful parse of file '%s' :)", name);
     if (argc == 3) {
         const char *formulas = argv[2]; // sylvan_true's: initial state, relations
-        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set, initial_marking);
+        //const char* name, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
+        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set,  map, initial_marking);
         if (res) warn("Unable to load xml '%s'", formulas);
         }
 
@@ -291,7 +293,6 @@ BDD
 parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map) 
 {
     LACE_ME;
-    warn("HERE");
     // first check if the node is not a NULL pointer.
     if (node == NULL) {       
         warn("Invalid XML");
@@ -310,7 +311,6 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
             return checkEG(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map ), relations, n_relations,  x, map );
         } else { // AG
             return checkAG(parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map ), relations, n_relations,  x, map );
-
         }
     // parse Finally
     } else if (xmlStrcmp(node->name, (const xmlChar*) "finally") == 0) {
@@ -319,7 +319,6 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
             return checkEF(parse_formula_BU(xmlFirstElementChild(node), andl_context, 0, relations, n_relations,  x, map ), relations, n_relations,  x, map );
         } else { // AF
             return checkAF(parse_formula_BU(xmlFirstElementChild(node), andl_context, 0, relations, n_relations,  x, map ), relations, n_relations,  x, map );
-
         }
     // parse neXt
     } else if (xmlStrcmp(node->name, (const xmlChar*) "next") == 0) {
@@ -341,7 +340,6 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
     // parse negation
     } else if (xmlStrcmp(node->name, (const xmlChar*) "negation") == 0) {
         return sylvan_not (parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map ));
-        fprintf(stderr, ")");
     // parse conjunction
     } else if (xmlStrcmp(node->name, (const xmlChar*) "conjunction") == 0) {
         BDD res = parse_formula_BU(xmlFirstElementChild(node),andl_context,0, relations, n_relations,  x, map );
@@ -374,13 +372,11 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
 
         for (xmlNode *transition = node; transition != NULL;
                 transition = xmlNextElementSibling(transition)) {
-            warn(xmlNodeGetContent(transition));
 
             BDD intermediate = petri_fireable_transition (andl_context->transitions, xmlNodeGetContent(transition), andl_context->num_places);
                     sylvan_protect(&intermediate);
             res = sylvan_or(res, intermediate);
             sylvan_unprotect(&intermediate);
-            fprintf(stderr, "%s,", xmlNodeGetContent(transition));
         }
         sylvan_unprotect(&res);
         return res;
@@ -397,6 +393,7 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
 static int
 parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
 {
+
     LACE_ME;
     int res = 0;
     // first check if the node is not a NULL pointer.
@@ -415,34 +412,33 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
         }
     // parse property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "property") == 0) {
-        warn("parsing property");
+        //warn("parsing property");
         res = parse_xml(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking);
     // parse id of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "id") == 0) {
-        warn("Property id is: %s", xmlNodeGetContent(node));
+        //warn("Property id is: %s", xmlNodeGetContent(node));
         res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse description of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "description") == 0) {
-        warn("Property description is: %s", xmlNodeGetContent(node));
+        //warn("Property description is: %s", xmlNodeGetContent(node));
         res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse the formula
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
-        warn("Parsing formula...");
-        parse_formula(xmlFirstElementChild(node));
+        //warn("Parsing formula...");
+        //parse_formula(xmlFirstElementChild(node));
         BDD ans = parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
-        //export_bdd(ans, 9128);
         sylvan_protect(&ans);
-        BDD ansz = sylvan_and(initial_marking, ans);
+        export_bdd(ans, 91);
+        BDD ansz = sylvan_and(ans, initial_marking);
+        if (ansz == sylvan_false)
+            printf("F");
+        else
+            printf("T");
         sylvan_protect(&ansz);
-
         sylvan_unprotect(&ans);
-        printf("\n\n NUMS: %i : %i\n", ansz, sylvan_false);
         sylvan_unprotect(&ansz);
-    // sylvan_unprotect(&initial_marking);
-       // int satcount = sylvan_satcount(ans, x);
-        //printf("satcount: %i\n", satcount);
+
         res = 0;
-        printf("\n");
     // node not recognized
     } else {
         res = 1;
@@ -464,7 +460,6 @@ load_xml(const char* name, andl_context_t *transitions, int isAll, BDD relations
     int res;
 
     LIBXML_TEST_VERSION
-    warn("parsing formulas file: %s", name);
     xmlDoc *doc = xmlReadFile(name, NULL, 0);
     if (doc == NULL) res = 1;
     else {

@@ -49,7 +49,7 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
   LACE_ME;
   BDD bdd = sylvan_true;
   sylvan_protect(&bdd);
-  printf("%s",name);
+  //printf("%s",name);
   transitions_struct_t* transition;
   transition = malloc(sizeof(transitions_struct_t));
 
