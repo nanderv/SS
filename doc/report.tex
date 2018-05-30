@@ -33,29 +33,26 @@ The features that are implemented are a follows:
 \item SatCount
 \item CTL Model Checking
 \end{enumerate}
-\section{Representing a petri net as BDD}
-Input to the model checker are ANDL files. An ANDL file specifies the places and transitions in a petri net. The model checker parses ANDL files and maintains a representation that can be used to later create description diagrams. The parser maintains a hashmap of transitions and places in an \texttt{andl\_context\_t} type, defined in \texttt{andl.h}. The places hashmaps uses \texttt{places\_struct\_t} which maps the place name to a BDD variable and an initial marking. The transitions hashmap maps transition names to \texttt{transitions\_struct\_t}, which contains arrays of incoming arc and outgoing arcs. An arc is then an integer which is the BDD variable of the place the arc relates to.
+\section{Reachability on Petri Nets using BDD}
+Input to the model checker are ANDL files. An ANDL file specifies the places and transitions in a petri net. The model checker parses ANDL files and maintains a representation that can be used to later create description diagrams. The parser maintains a hashmap of transitions and places in an \texttt{andl\_context\_t} type, defined in \texttt{andl.h}. The places hashmaps uses \texttt{places\_struct\_t} which maps the place name to a BDD variable and an initial marking. Since only one-safe petri nets are implemented, one BDD variable suffices that represents if the place is marked or not.  The transitions hashmap maps transition names to \texttt{transitions\_struct\_t}, which contains arrays of incoming arc and outgoing arcs. An arc is then an integer which is the BDD variable of the place the arc relates to.
 
-The structure in \texttt{andl\_context\_t} is later used to construct BDDs that represent the inital marking and the transitions of the petri net. These BDDs are required to find all reachable states of the petri net (which in itself is expressed as a new bdd \texttt{v}), and to count the number of minterms for this bdd. The file \texttt{petri-helpers.h} contains a number of functions help create these BDDs using an \texttt{andl\_context\_t}. A BDD representing the fireability of a petri net transition isconstructed using \texttt{petri\_fireable\_transition}. When applied to all known transitions, this results in an array of all BDD transition relations. Before this step it is required to sort in- and out-arc arrays of transitions using \texttt{petri\_sort\_arcs}. For a number of places $N$, \texttt{petri\_fireable\_transition} constructs a BDD of even BDD variables $0..N$, whenever $n$ is an in-arc it is required that the non-prime variable is marked and the prime variable is marked. Whenever $n$ is an out-arc, it is required that the non-prime variable is unmarked and the prime variable is marked. Whenever $n$ is not an arc, it is required that the non-prime variable and prime variable are equal.
+The structure in \texttt{andl\_context\_t} is later used to construct BDDs that represent the inital marking and the transitions of the petri net. These BDDs are required to find all reachable states of the petri net (which in itself is expressed as a new bdd \texttt{v}), and to count the number of minterms for this bdd. The file \texttt{petri-helpers.h} contains a number of functions help create these BDDs using an \texttt{andl\_context\_t}. The function \texttt{petri\_get\_marking} from \texttt{petri-helpers.h} represents the current (i.e. the initial) marking of the petri net as a BDD. A BDD representing the fireability of a petri net transition isconstructed using \texttt{petri\_fireable\_transition}. When applied to all known transitions, this results in an array of all BDD transition relations. Before this step it is required to sort in- and out-arc arrays of transitions using \texttt{petri\_sort\_arcs}. For a number of places $N$, \texttt{petri\_fireable\_transition} constructs a BDD of even BDD variables $0..N$, whenever $n$ is an in-arc it is required that the non-prime variable is marked and the prime variable is marked. Whenever $n$ is an out-arc, it is required that the non-prime variable is unmarked and the prime variable is marked. Whenever $n$ is not an arc, it is required that the non-prime variable and prime variable are equal.
 
+Reachability is implemented in \texttt{bdd-helpers.h} as function \texttt{reachable\_states}. This function implements breadth-first search, growing the initial states until no new states can be reached using the given transitions. This function, together with \texttt{sylvan\_satcount} is called in \texttt{ss.c}, \texttt{do\_ss\_things}.
 
-
-\section{How to navigate the code}
-\begin{description}[align=left]
-\item [bdd-util.c:50] explain
-\item [petri-util.c:50] explain
-\end{description}
-
+\section{CTL Model Checking}
+To implement CTL model checking modifications are made to the file \texttt{ss.c} and helper functions are defined in \texttt{checker.c}. The functions \texttt{load\_xml, parse\_xml} are modified to accept more parameters. These parameters include the \texttt{andl\_context}, an array of BDDs representing the fireability transition relations, the non-prime variables in the inital marking, and a map. The parameters are passed to \texttt{parse\_formula\_BU} (an adaptation of \texttt{parse\_formula}), which returns a BDD. This resulting BDD represents the result of checking the CTL expression. \texttt{parse\_formula\_BU} is a recursively defined function. This function decides, based on the name of a node which CTL logic to apply. In effect this means that \texttt{checkEG}, \texttt{checkEU} and \texttt{checkEX} functions are applied. These functions are defined in \texttt{checkers.c}. Translation from other CTL operators to this set is implemented in various helper functions in \texttt{checkers.c} or directly in \texttt{parse\_formula\_BU}.
 
 \section{Results}
-Here we present the acquired of the implementation on a number of test cases.
+Here we present the results when applying our implementation to a number of different test models.
+\begin{enumerate}
+\item In the philosophers model the model checker appears to behave correctly. The correct satcount is reported, and correct answers for CTL cases are provided. Yet the checker crashes on the fourth check because sylvan runs out of buckets.
+  \item On the eratosthenes\_pt\_010 model the model checker does not crash, but the found results are not correct. Both the satcount is different, and the results of checks are different.
+\end{enumerate}
+\section{Discussion}
+While all essential parts of the model checker are implemented, the model checker fails to yield correct results in all cases or it craches. It is observed that certain models and accompanying CTL expressions may contain elements that the model checker not supports, such as different CTL operators, not being one-safe, etcetera. Since Sylvan runs out of buckets we suspect that in our implementation Sylvan is unable to properly garbage collection, remove unused BDDs, and simply runs out of free BDDs after some time.
 
-\begin{tabular}[pos]{l | r | r}
-  Model & SATCount & CTL check \\
-  \hline
-  Philosophers & 243 & a\\
-\end{tabular}
-
+It is shown that one-safe petri nets can trivially represented using BDDs. Algorithms for reachability and CTL model checking are straight forward to implement. Sadly, since both contributors to this project are inexperienced in C programming, a lot of time was lost on learning the C ecosystem and perhaps trivial to debug bugs. Yet the project is a great tool to understand the methodology of symbolic model checking.
 
 \printbibliography
 \end{document}
