@@ -27,10 +27,6 @@ BDD petri_fireable_transition (map_t transitions, char* name, int num_variables)
 BDD petri_get_marking (map_t places);
 
 
-
-//int petri_get_marking (BDD* bdd, places_struct_t* i);
-//int petri_get_transitions (BDD* r[], transitions_struct_t* i);
-
                             
 
 /* debug function that prints placenames and associated bddvars to stdout

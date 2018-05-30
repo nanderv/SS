@@ -1,0 +1,8 @@
+Results and Conclusion
+
+Our model-checker did not really work to the expected level of functionality. On the supplied test-model it was able to count the correct number of states, and give the correct answer for the first three test cases. On the fourth testcase it crashed after fifteen methods, because it ran out of buckets. This may be caused by our logic having been implemented in a straightforward way, without attempting to optimize it.
+
+On the Eratosthenes_PT_010 model, it was able to come to *an* answer, but the answers yielded had little to no correlation with the correct answers. The satcount of our implementation differed from the satcounts given in the results table, and this probably caused the different answers.
+
+To conclude, our model checker was a good learning experience, but not worth looking at beyond grading. 
+The tools provided did however seem promising, besides the trouble we had with C, the algorithms explained were fairly straightforward to implement. 
