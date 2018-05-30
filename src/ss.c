@@ -243,13 +243,12 @@ parse_formula(xmlNode *node)
 }
 
 /**
-* Recursive descent for formula parsing, thus validating the formula.
+* Recursive descent for formula parsing, thus finding the state space of the formula.
 */
 BDD
 parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map) 
 {
     LACE_ME;
-    warn("HERE");
     // first check if the node is not a NULL pointer.
     if (node == NULL) {       
         warn("Invalid XML");
@@ -296,7 +295,6 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
             sylvan_unprotect(&res2);
             return r;
         } else { // AU
-            //E[ψU(φ∧ψ)]EG(ψ)
             BDD res = parse_formula_BU(xmlFirstElementChild(node), andl_context,0, relations, n_relations,  x, map );
             sylvan_protect(&res);
             BDD res2 = parse_formula_BU(xmlNextElementSibling(xmlFirstElementChild(node)), andl_context,0, relations, n_relations,  x, map );
@@ -359,13 +357,14 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
 
         for (xmlNode *transition = node; transition != NULL;
                 transition = xmlNextElementSibling(transition)) {
-
             BDD intermediate = petri_fireable_transition (andl_context->transitions, xmlNodeGetContent(transition), andl_context->num_places);
-                    sylvan_protect(&intermediate);
+            sylvan_protect(&intermediate);
             res = sylvan_or(res, intermediate);
             sylvan_unprotect(&intermediate);
         }
+        
         sylvan_unprotect(&res);
+
         return res;
     } else {
         warn("Invalid xml node '%s'", node->name);
@@ -412,15 +411,18 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
         res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse the formula
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
-        warn("Parsing formula...");
         //parse_formula(xmlFirstElementChild(node));
         BDD ans = parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
         sylvan_protect(&ans);
         BDD ansz = sylvan_and(ans, initial_marking);
         if (ansz == sylvan_false)
-            warn("F");
+        {
+            printf("F");
+        }
         else
-            warn("T");
+        {
+            printf("T");
+        }
         sylvan_protect(&ansz);
         sylvan_unprotect(&ans);
         sylvan_unprotect(&ansz);

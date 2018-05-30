@@ -1,46 +1,50 @@
-pn  [SwimmingPool_PT_01]
+pn  [Eratosthenes_PT_010]
 {
 constants:
 places:
 discrete:
-  Entered = 0;
-  WaitBag = 0;
-  Undress = 0;
-  InBath = 0;
-  Dress = 0;
-  Dressed = 0;
-  Out = 20;
-  Cabins = 10;
-  Bags = 15;
+  p2 = 1;
+  p3 = 1;
+  p6 = 1;
+  p7 = 1;
+  p4 = 1;
+  p5 = 1;
+  p8 = 1;
+  p9 = 1;
+  p10 = 1;
 
 transitions:
-  GetK
+  t10_2
     : 
-    : [Entered - 1] & [WaitBag + 1] & [Cabins - 1]
+    : [p2 - 1] & [p10 - 1] & [p2 + 1]
     ;
-  GetB
+  t6_2
     : 
-    : [WaitBag - 1] & [Undress + 1] & [Bags - 1]
+    : [p2 - 1] & [p6 - 1] & [p2 + 1]
     ;
-  RelK
+  t6_3
     : 
-    : [Cabins + 1] & [Undress - 1] & [InBath + 1]
+    : [p3 - 1] & [p6 - 1] & [p3 + 1]
     ;
-  GetK2
+  t8_2
     : 
-    : [Cabins - 1] & [InBath - 1] & [Dress + 1]
+    : [p2 - 1] & [p8 - 1] & [p2 + 1]
     ;
-  RBag
+  t10_5
     : 
-    : [Bags + 1] & [Dress - 1] & [Dressed + 1]
+    : [p5 - 1] & [p10 - 1] & [p5 + 1]
     ;
-  RKey
+  t9_3
     : 
-    : [Dressed - 1] & [Out + 1] & [Cabins + 1]
+    : [p9 - 1] & [p3 - 1] & [p3 + 1]
     ;
-  Enter
+  t8_4
     : 
-    : [Out - 1] & [Entered + 1]
+    : [p4 - 1] & [p8 - 1] & [p4 + 1]
+    ;
+  t4_2
+    : 
+    : [p4 - 1] & [p2 - 1] & [p2 + 1]
     ;
 
 }

@@ -1,6 +1,5 @@
 #include <sylvan.h>
 
-// TODO: Prev function
 BDD MYprev(BDD in, BDD relations[], int n_relations, BDD x, BDDMAP map);
 BDD checkEU(BDD left, BDD right, BDD relations[], int n_relations, BDD x, BDDMAP map);
 BDD checkEG(BDD left, BDD relations[], int n_relations, BDD x, BDDMAP map);
