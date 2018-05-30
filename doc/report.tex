@@ -1,0 +1,58 @@
+\documentclass[twoside, a4paper]{article}
+\usepackage{enumitem}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+
+\usepackage[style=alphabetic,sorting=ynt]{biblatex} % (mvl: run with biber, a utf8 aware biblatex implentation)
+\addbibresource{bibliography.bib}
+
+\title{Model Checking Petri Nets using BDDs}
+\author{Leeuwen, M. van\\
+  \texttt{s0180858}\\
+  \and
+  Voortman, N.E.F.\\
+  \texttt{s1247247}
+}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This report discusses the implementation of a CTL model checker for Petri Nets using BDDs. The implementation uses the multi-core decision diagram library Sylvan \parencite{sylvan}. A set of Petri Net models is used to validate the correctness of the implementation. These models that are used are from the Model Checking Contest \parencite{mcc:2017}. For a small sample of models the implementation gives results for satcount and CTL model checking that are consistent with the results from reference implementations.
+
+\subsection{Implemented Features}
+
+The features that are implemented are a follows:
+\begin{enumerate}
+\item Reachability
+\item SatCount
+\item CTL Model Checking
+\end{enumerate}
+\section{Representing a petri net as BDD}
+Input to the model checker are ANDL files. An ANDL file specifies the places and transitions in a petri net. The model checker parses ANDL files and maintains a representation that can be used to later create description diagrams. The parser maintains a hashmap of transitions and places in an \texttt{andl\_context\_t} type, defined in \texttt{andl.h}. The places hashmaps uses \texttt{places\_struct\_t} which maps the place name to a BDD variable and an initial marking. The transitions hashmap maps transition names to \texttt{transitions\_struct\_t}, which contains arrays of incoming arc and outgoing arcs. An arc is then an integer which is the BDD variable of the place the arc relates to.
+
+
+\section{How to navigate the code}
+\begin{description}[align=left]
+\item [bdd-util.c:50] explain
+\item [petri-util.c:50] explain
+\end{description}
+
+
+\section{Results}
+Here we present the acquired of the implementation on a number of test cases.
+
+\begin{tabular}[pos]{l | r | r}
+  Model & SATCount & CTL check \\
+  \hline
+  Philosophers & 243 & a\\
+\end{tabular}
+
+
+\printbibliography
+\end{document}
