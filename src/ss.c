@@ -147,7 +147,7 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     if (argc == 3) {
         const char *formulas = argv[2]; // sylvan_true's: initial state, relations
         //const char* name, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
-        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set,  map, initial_marking);
+        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, non_prime_variables,  sylvan_map_empty(), initial_marking);
         if (res) warn("Unable to load xml '%s'", formulas);
     }
 
