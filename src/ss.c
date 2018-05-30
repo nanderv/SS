@@ -188,7 +188,7 @@ do_ss_things(andl_context_t *andl_context,int argc, char** argv)
     warn("Successful parse of file '%s' :)", name);
     if (argc == 3) {
         const char *formulas = argv[2]; // sylvan_true's: initial state, relations
-        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set);
+        int res = load_xml(formulas, andl_context, 0, transitions, andl_context->num_transitions, set, initial_marking);
         if (res) warn("Unable to load xml '%s'", formulas);
         }
 
@@ -395,7 +395,7 @@ parse_formula_BU(xmlNode *node, andl_context_t *andl_context, int isAll, BDD rel
  * \brief recursively parse the given XML node.
  */
 static int
-parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map) 
+parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
 {
     LACE_ME;
     int res = 0;
@@ -404,35 +404,41 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
         res = 1;
         warn("Invalid XML");
     // only parse xml nodes, skip other parts of the XML file.
-    } else if (node->type != XML_ELEMENT_NODE) res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map );
+    } else if (node->type != XML_ELEMENT_NODE) res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse property-set
     else if (xmlStrcmp(node->name, (const xmlChar*) "property-set") == 0) {
         // loop over all children that are property nodes
         for (xmlNode *property = xmlFirstElementChild(node);
                 property != NULL && !res;
                 property = xmlNextElementSibling(property)) {
-            res = parse_xml(property, transitions,  isAll, relations, n_relations,  x, map );
+            res = parse_xml(property, transitions,  isAll, relations, n_relations,  x, map, initial_marking );
         }
     // parse property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "property") == 0) {
         warn("parsing property");
-        res = parse_xml(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
+        res = parse_xml(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking);
     // parse id of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "id") == 0) {
         warn("Property id is: %s", xmlNodeGetContent(node));
-        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map );
+        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse description of property
     } else if (xmlStrcmp(node->name, (const xmlChar*) "description") == 0) {
         warn("Property description is: %s", xmlNodeGetContent(node));
-        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map );
+        res = parse_xml(xmlNextElementSibling(node), transitions,  isAll, relations, n_relations,  x, map, initial_marking );
     // parse the formula
     } else if (xmlStrcmp(node->name, (const xmlChar*) "formula") == 0) {
         warn("Parsing formula...");
         parse_formula(xmlFirstElementChild(node));
         BDD ans = parse_formula_BU(xmlFirstElementChild(node), transitions,  isAll, relations, n_relations,  x, map );
         //export_bdd(ans, 9128);
-        printf("\n\n NUMS: %i : %i\n", ans, sylvan_false);
+        sylvan_protect(&ans);
+        BDD ansz = sylvan_and(initial_marking, ans);
+        sylvan_protect(&ansz);
 
+        sylvan_unprotect(&ans);
+        printf("\n\n NUMS: %i : %i\n", ansz, sylvan_false);
+        sylvan_unprotect(&ansz);
+    // sylvan_unprotect(&initial_marking);
        // int satcount = sylvan_satcount(ans, x);
         //printf("satcount: %i\n", satcount);
         res = 0;
@@ -452,7 +458,7 @@ parse_xml(xmlNode *node, andl_context_t *transitions, int isAll, BDD relations[]
  * \returns 0 on success, 1 on failure.
  */
 int
-load_xml(const char* name, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map) 
+load_xml(const char* name, andl_context_t *transitions, int isAll, BDD relations[], int n_relations, BDD x, BDDMAP map, BDD initial_marking) 
 {
     LACE_ME;
     int res;
@@ -463,7 +469,7 @@ load_xml(const char* name, andl_context_t *transitions, int isAll, BDD relations
     if (doc == NULL) res = 1;
     else {
         xmlNode *node = xmlDocGetRootElement(doc);
-        res = parse_xml(node, transitions, isAll, relations, n_relations,  x, map );
+        res = parse_xml(node, transitions, isAll, relations, n_relations,  x, map, initial_marking );
     }
 
     return res;
